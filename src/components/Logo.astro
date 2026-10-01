@@ -1,0 +1,64 @@
+---
+interface Props {
+  /** eindeutiger Suffix, damit Gradient-IDs bei mehreren Logos nicht kollidieren */
+  uid?: string;
+}
+const { uid = 'h' } = Astro.props;
+const gid = `logo-grad-${uid}`;
+---
+
+<span class="logo">
+  <svg class="logo-mark" viewBox="0 0 40 40" width="38" height="38" aria-hidden="true">
+    <defs>
+      <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#cffafe"></stop>
+        <stop offset="0.5" stop-color="#7dd3fc"></stop>
+        <stop offset="1" stop-color="#3b82f6"></stop>
+      </linearGradient>
+    </defs>
+    <path d="M20 2.5 35 8.5v11.2c0 9-6.3 15.4-15 17.8C11.3 35.1 5 28.7 5 19.7V8.5z" fill={`url(#${gid})`}></path>
+    <g stroke="#04101f" stroke-width="2.1" stroke-linecap="round" fill="none">
+      <path d="M20 11v17.5M12.4 15.4l15.2 8.8M12.4 24.2l15.2-8.8"></path>
+      <path d="M17.6 12.4 20 14.3l2.4-1.9M17.6 27.1l2.4-1.9 2.4 1.9"></path>
+    </g>
+  </svg>
+  <span class="logo-text">
+    <span class="logo-name">WinterWacht</span>
+    <span class="logo-sub">Niederrhein</span>
+  </span>
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--text);
+  }
+
+  .logo-mark {
+    flex: none;
+    filter: drop-shadow(0 4px 14px rgb(56 189 248 / 0.35));
+  }
+
+  .logo-text {
+    display: grid;
+    line-height: 1;
+  }
+
+  .logo-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-sub {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin-top: 4px;
+  }
+</style>

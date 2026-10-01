@@ -1,0 +1,107 @@
+---
+/**
+ * Beispiel-Bewertungen für die Demo. Bewusst KEIN AggregateRating-Schema:
+ * erfundene Bewertungen als strukturierte Daten wären irreführend und
+ * verstoßen gegen die Google-Richtlinien. Beim Livegang durch echte
+ * Stimmen (z. B. aus dem Google-Unternehmensprofil) ersetzen.
+ */
+import Icon from '../Icon.astro';
+
+const stimmen = [
+  {
+    text: 'Seit der Umstellung liegt jeden Morgen das Protokoll im Postfach. Bei einer Reklamation konnten wir die Räumung um 5:42 Uhr belegen – Thema erledigt.',
+    rolle: 'Facility Management',
+    firma: 'Logistikunternehmen, Willich-Münchheide',
+  },
+  {
+    text: 'Unser Kundenparkplatz ist vor Ladenöffnung frei und die Wege zum Eingang sind abgestreut – auf dem Gehweg ohne Salz, wie es die Stadt verlangt.',
+    rolle: 'Filialleitung',
+    firma: 'Lebensmittelmarkt, Krefeld-Fischeln',
+  },
+  {
+    text: 'Als Verwaltung mit vielen Objekten brauchen wir Nachweise statt Zusagen. Die Protokolle geben wir direkt an die Eigentümergemeinschaften weiter.',
+    rolle: 'Objektbetreuung',
+    firma: 'Hausverwaltung, Meerbusch-Büderich',
+  },
+];
+---
+
+<section class="section bewertungen" aria-labelledby="bewertungen-title">
+  <div class="container">
+    <header class="section-head center" data-reveal>
+      <p class="eyebrow">Stimmen aus der Region</p>
+      <h2 id="bewertungen-title">Was Kunden an einem Winterdienst mit Nachweis schätzen</h2>
+      <p class="demo-label">
+        <Icon name="alert" size={15} /> Beispiel-Bewertungen für die Demo – keine echten Kundenstimmen
+      </p>
+    </header>
+
+    <div class="grid grid-3" data-reveal-stagger>
+      {
+        stimmen.map((s) => (
+          <figure class="card stimme">
+            <Icon name="quote" size={28} class="stimme-quote" />
+            <div class="sterne" aria-label="5 von 5 Sternen (Beispiel)">★★★★★</div>
+            <blockquote>{s.text}</blockquote>
+            <figcaption>
+              <strong>{s.rolle}</strong>
+              <span>{s.firma}</span>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .demo-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px dashed rgb(240 171 252 / 0.5);
+    color: #f5d0fe;
+    font-size: 0.82rem;
+    margin: 0;
+  }
+
+  .stimme {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stimme :global(.stimme-quote) {
+    color: var(--ice);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  .sterne {
+    color: var(--warn);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.8rem;
+  }
+
+  blockquote {
+    margin: 0 0 1.6rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  figcaption {
+    margin-top: auto;
+    display: grid;
+    gap: 0.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  figcaption span {
+    color: var(--muted);
+  }
+</style>

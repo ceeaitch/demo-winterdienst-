@@ -1,0 +1,286 @@
+---
+/**
+ * Vorlage für Ortsseiten. Für jeden Ort mit `page`-Inhalt in src/data/orte.ts
+ * erzeugt Astro beim Build eine eigene Seite: /einsatzgebiet/<slug>/
+ */
+import type { ImageMetadata } from 'astro';
+import imgGehweg from '../../assets/images/gehweg-winter.jpg';
+import imgParkplatz from '../../assets/images/parkplatz-schnee.jpg';
+import imgFahrzeug from '../../assets/images/raeumfahrzeug-einsatz.jpg';
+import imgStrasse from '../../assets/images/strasse-nacht.jpg';
+import AnfrageForm from '../../components/AnfrageForm.astro';
+import EinsatzKarte from '../../components/EinsatzKarte.astro';
+import Faq from '../../components/Faq.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import { company } from '../../data/company';
+import { orte, orteMitSeite, type OrtMitDistanz, type OrtPage } from '../../data/orte';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { faqSchema, serviceSchema } from '../../lib/schema';
+import { distanceKm, withBase } from '../../lib/site';
+
+export function getStaticPaths() {
+  return orteMitSeite.map((ort) => ({ params: { ort: ort.slug }, props: { ort } }));
+}
+
+interface Props {
+  ort: OrtMitDistanz & { page: OrtPage };
+}
+
+const { ort } = Astro.props;
+const p = ort.page;
+const path = `/einsatzgebiet/${ort.slug}/`;
+
+const heroImages: Record<string, { img: ImageMetadata; alt: string }> = {
+  'krefeld-uerdingen': { img: imgFahrzeug, alt: 'Räumfahrzeug im Einsatz auf einer verschneiten Straße' },
+  meerbusch: { img: imgGehweg, alt: 'Verschneiter Gehweg mit Bäumen im Winter' },
+  willich: { img: imgParkplatz, alt: 'Verschneiter Firmenparkplatz aus der Vogelperspektive' },
+};
+const hero = heroImages[ort.slug] ?? { img: imgStrasse, alt: 'Verschneite Straße bei Nacht' };
+
+const istKrefeld = ort.region === 'Krefeld';
+const fakten = [
+  { icon: 'map-pin', label: 'Entfernung', value: `${ort.km.toLocaleString('de-DE')} km ab Betriebshof` },
+  { icon: 'clock', label: 'Tourstart bei Glätte', value: 'ab 3:00 Uhr' },
+  { icon: 'scale', label: 'Ortsrecht', value: istKrefeld ? 'Straßenreinigungssatzung Krefeld' : `eigene Satzung ${ort.name}` },
+  { icon: 'building', label: 'Kreis / Stadt', value: ort.region },
+] as const;
+
+// Interne Verlinkung: die nächstgelegenen Orte (ab diesem Ort gemessen)
+const nachbarn = orte
+  .filter((o) => o.slug !== ort.slug)
+  .sort((a, b) => distanceKm(ort, a) - distanceKm(ort, b))
+  .slice(0, 10);
+---
+
+<BaseLayout
+  title={p.metaTitle}
+  description={p.metaDescription}
+  path={path}
+  breadcrumbs={[
+    { name: 'Einsatzgebiet', path: '/einsatzgebiet/' },
+    { name: ort.name, path },
+  ]}
+  schema={[
+    serviceSchema({ name: `Winterdienst ${ort.name}`, description: p.metaDescription, path, area: ort.name }),
+    faqSchema(p.faq),
+  ]}
+>
+  <PageHero eyebrow={`Winterdienst · ${ort.region}`} title={p.h1} image={hero.img} imageAlt={hero.alt}>
+    <a class="btn btn-primary btn-lg" href="#anfrage">Angebot für {ort.name} <Icon name="arrow-right" size={18} class="arrow" /></a>
+    <a class="btn btn-ghost btn-lg" href={withBase('/#pflicht-check')}>Pflicht-Check</a>
+  </PageHero>
+
+  <section class="section intro">
+    <div class="container intro-grid">
+      <div data-reveal>
+        <p class="eyebrow">Auf einen Blick</p>
+        <h2>Winterdienst in {ort.name}: Was wir für Sie tun</h2>
+        <p class="lead">{p.intro}</p>
+        {
+          p.stadtteile && (
+            <p class="muted">
+              Wir sind in allen Stadtteilen im Einsatz: {p.stadtteile.join(', ')}.
+            </p>
+          )
+        }
+      </div>
+      <ul class="fakten card" data-reveal-stagger>
+        {
+          fakten.map((f) => (
+            <li class="fakt">
+              <span class="icon-badge">
+                <Icon name={f.icon} size={20} />
+              </span>
+              <span>
+                <span class="fakt-label">{f.label}</span>
+                <span class="fakt-value">{f.value}</span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="glow-bg" style="--glow-x: 80%; --glow-y: 30%"></div>
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Einsatzschwerpunkte</p>
+        <h2>Wo wir in {ort.name} räumen</h2>
+      </header>
+      <div class="grid grid-3" data-reveal-stagger>
+        {
+          p.schwerpunkte.map((s) => (
+            <article class="card card-hover">
+              <span class="icon-badge">
+                <Icon name="building" size={22} />
+              </span>
+              <h3>{s.title}</h3>
+              <p class="muted">{s.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container satzung-grid">
+      <div class="satzung card" data-reveal>
+        <span class="icon-badge"><Icon name="scale" size={22} /></span>
+        <h2>Räumpflicht in {ort.name}</h2>
+        <p>{p.satzung}</p>
+        <p class="legal-note">
+          Allgemeine Information, keine Rechtsberatung. Stand: {company.legalAsOf}. Mehr im
+          <a href={withBase('/ratgeber/raeumpflicht-krefeld/')}>Ratgeber Räumpflicht</a>.
+        </p>
+      </div>
+      <div data-reveal>
+        <h2 class="leist-title">Unsere Leistungen in {ort.name}</h2>
+        <ul class="check-list">
+          <li>Schneeräumung von Gehwegen, Zugängen, Zufahrten und Parkplätzen</li>
+          <li>Satzungskonforme Glättebekämpfung – auf Gehwegen salzfrei</li>
+          <li>24/7-Wetterüberwachung und Einsätze an 7 Tagen pro Woche</li>
+          <li>Digitales Räumprotokoll mit Zeitstempel, GPS und Foto</li>
+          <li>Vertragliche Übernahme der Räum- und Streupflicht</li>
+        </ul>
+        <a class="btn btn-ghost" href={withBase('/leistungen/winterdienst-gewerbe/')}>Alle Leistungen im Detail</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Lage</p>
+        <h2>{ort.name} im Einsatzgebiet</h2>
+      </header>
+      <div data-reveal><EinsatzKarte focus={ort.slug} showList={false} height="440px" /></div>
+    </div>
+  </section>
+
+  <Faq items={p.faq} title={`Fragen zum Winterdienst in ${ort.name}`} eyebrow="FAQ" />
+
+  <section class="section nachbarn">
+    <div class="container">
+      <h2 class="nachbarn-title">Auch in der Nähe von {ort.name} im Einsatz</h2>
+      <ul>
+        {
+          nachbarn.map((n) => (
+            <li>
+              {n.page ? <a href={withBase(`/einsatzgebiet/${n.slug}/`)}>{n.name}</a> : <span>{n.name}</span>}
+            </li>
+          ))
+        }
+        <li><a href={withBase('/einsatzgebiet/')}>Alle Orte →</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <AnfrageForm title={`Winterdienst in ${ort.name} anfragen`} />
+</BaseLayout>
+
+<style>
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+
+  .fakten {
+    display: grid;
+    gap: 1.2rem;
+    margin: 0;
+    list-style: none;
+  }
+
+  .fakt {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .fakt .icon-badge {
+    margin: 0;
+    width: 44px;
+    height: 44px;
+  }
+
+  .fakt-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .fakt-value {
+    display: block;
+    margin-top: 0.1rem;
+    font-weight: 600;
+  }
+
+  .satzung-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+
+  .satzung h2,
+  .leist-title {
+    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.9rem);
+  }
+
+  .leist-title {
+    margin-bottom: 1.2rem;
+  }
+
+  .satzung + div .btn {
+    margin-top: 1.6rem;
+  }
+
+  .nachbarn {
+    padding-block: 0 var(--section-y);
+  }
+
+  .nachbarn-title {
+    font-size: 1.2rem;
+  }
+
+  .nachbarn ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .nachbarn li > * {
+    display: inline-block;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.9rem;
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  .nachbarn li > a {
+    color: var(--ice);
+    border-color: rgb(125 211 252 / 0.35);
+  }
+
+  @media (max-width: 900px) {
+    .intro-grid,
+    .satzung-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

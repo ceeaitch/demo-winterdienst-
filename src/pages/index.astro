@@ -1,0 +1,76 @@
+---
+import AnfrageForm from '../components/AnfrageForm.astro';
+import EinsatzKarte from '../components/EinsatzKarte.astro';
+import Faq from '../components/Faq.astro';
+import Bewertungen from '../components/home/Bewertungen.astro';
+import Haftung from '../components/home/Haftung.astro';
+import Hero from '../components/home/Hero.astro';
+import Kostenrechner from '../components/home/Kostenrechner.astro';
+import Leistungen from '../components/home/Leistungen.astro';
+import NachtTimeline from '../components/home/NachtTimeline.astro';
+import PflichtCheck from '../components/home/PflichtCheck.astro';
+import Zielgruppen from '../components/home/Zielgruppen.astro';
+import { company } from '../data/company';
+import { faqStart } from '../data/faq';
+import { orteMitSeite } from '../data/orte';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { faqSchema, serviceSchema } from '../lib/schema';
+import { withBase } from '../lib/site';
+
+const title = 'Winterdienst Krefeld für Gewerbe | Räumen, Streuen, Nachweis';
+const description =
+  'Winterdienst in Krefeld & 20 km Umkreis für Gewerbe, Handel und Verwaltungen: bis 7 Uhr geräumt, salzfrei gestreut, jeder Einsatz digital dokumentiert.';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path="/"
+  schema={[
+    serviceSchema({
+      name: 'Winterdienst für Unternehmen in Krefeld und Umgebung',
+      description: company.description,
+      path: '/',
+    }),
+    faqSchema(faqStart),
+  ]}
+>
+  <Hero />
+  <Haftung />
+  <PflichtCheck />
+  <NachtTimeline />
+  <Zielgruppen />
+  <Leistungen />
+  <Kostenrechner />
+
+  <section class="section" id="einsatzgebiet">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Einsatzgebiet</p>
+        <h2>Winterdienst in Krefeld und {company.radiusKm} km Umkreis</h2>
+        <p class="lead">
+          Von Uerdingen bis Hüls, von Meerbusch bis Moers: Kurze Wege von unserem Betriebshof bedeuten schnelle Reaktion –
+          auch bei Nachschneien am Vormittag.
+        </p>
+        <p class="muted">
+          Lokale Details:
+          {
+            orteMitSeite.map((o, i) => (
+              <>
+                {i > 0 && ' · '}
+                <a href={withBase(`/einsatzgebiet/${o.slug}/`)}>Winterdienst {o.name}</a>
+              </>
+            ))
+          }
+        </p>
+      </header>
+      <div data-reveal>
+        <EinsatzKarte />
+      </div>
+    </div>
+  </section>
+
+  <Bewertungen />
+  <Faq items={faqStart} />
+  <AnfrageForm />
+</BaseLayout>

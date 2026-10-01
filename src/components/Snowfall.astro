@@ -1,0 +1,150 @@
+---
+/**
+ * Schneefall auf <canvas>. Performance-Regeln:
+ *  - pausiert, wenn nicht sichtbar (IntersectionObserver) oder Tab im Hintergrund
+ *  - Pixeldichte auf max. 2 begrenzt, Flockenanzahl abhängig von der Fläche
+ *  - bei „Bewegung reduzieren“ nur ein statisches Bild
+ */
+---
+
+<canvas class="snowfall" data-snowfall aria-hidden="true"></canvas>
+
+<style>
+  .snowfall {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  type Flake = { x: number; y: number; r: number; vy: number; phase: number; sway: number; o: number };
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Vorgerenderte weiche Flocke → drawImage ist deutlich schneller als arc()+Gradient
+  function makeSprite() {
+    const s = document.createElement('canvas');
+    s.width = s.height = 32;
+    const g = s.getContext('2d')!;
+    const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.45, 'rgba(235,245,255,0.8)');
+    grad.addColorStop(1, 'rgba(235,245,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 32, 32);
+    return s;
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('[data-snowfall]').forEach((canvas) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const sprite = makeSprite();
+    let w = 0;
+    let h = 0;
+    let flakes: Flake[] = [];
+    let running = false;
+    let visible = true;
+    let raf = 0;
+    let wind = 0;
+    let targetWind = 0;
+    let intensity = document.documentElement.dataset.frost === 'on' ? 2.2 : 1;
+
+    const spawn = (anywhere: boolean): Flake => {
+      const r = Math.random() ** 2 * 2.6 + 0.6;
+      return {
+        x: Math.random() * w,
+        y: anywhere ? Math.random() * h : -10,
+        r,
+        vy: (0.25 + Math.random() * 0.55) * (0.6 + r * 0.35),
+        phase: Math.random() * Math.PI * 2,
+        sway: 0.2 + Math.random() * 0.6,
+        o: 0.35 + Math.random() * 0.6,
+      };
+    };
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const target = Math.min(260, Math.round(((w * h) / 9000) * intensity));
+      while (flakes.length < target) flakes.push(spawn(true));
+      flakes.length = target;
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (const f of flakes) {
+        const size = f.r * 4;
+        ctx.globalAlpha = f.o;
+        ctx.drawImage(sprite, f.x - size / 2, f.y - size / 2, size, size);
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    const step = (t: number) => {
+      wind += (targetWind - wind) * 0.02;
+      const speed = intensity > 1.5 ? 1.7 : 1;
+      for (const f of flakes) {
+        f.y += f.vy * speed;
+        f.x += Math.sin(t / 1400 + f.phase) * f.sway * 0.35 + wind * f.r * 0.6;
+        if (f.y > h + 10) Object.assign(f, spawn(false));
+        if (f.x > w + 10) f.x = -10;
+        if (f.x < -10) f.x = w + 10;
+      }
+      draw();
+      raf = requestAnimationFrame(step);
+    };
+
+    const start = () => {
+      if (running || reduceMotion || !visible || document.hidden) return;
+      running = true;
+      raf = requestAnimationFrame(step);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    resize();
+    draw();
+
+    new ResizeObserver(() => {
+      resize();
+      if (!running) draw();
+    }).observe(canvas);
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) start();
+      else stop();
+    }).observe(canvas);
+
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+
+    // Wind folgt sanft der Mausposition
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        targetWind = (e.clientX / window.innerWidth - 0.5) * (intensity > 1.5 ? 1.6 : 0.8);
+      },
+      { passive: true },
+    );
+
+    // Demo: „Frostnacht simulieren“ → mehr und schnellerer Schnee
+    window.addEventListener('ww:frost', (e) => {
+      intensity = (e as CustomEvent<boolean>).detail ? 2.2 : 1;
+      targetWind = intensity > 1.5 ? 0.6 : 0;
+      resize();
+      if (!running) draw();
+    });
+
+    start();
+  });
+</script>

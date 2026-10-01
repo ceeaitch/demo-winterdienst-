@@ -1,0 +1,266 @@
+---
+import heroImg from '../../assets/images/raeumfahrzeug-einsatz.jpg';
+import AnfrageForm from '../../components/AnfrageForm.astro';
+import Faq from '../../components/Faq.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import Zielgruppen from '../../components/home/Zielgruppen.astro';
+import { company } from '../../data/company';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { faqSchema, serviceSchema } from '../../lib/schema';
+import { withBase } from '../../lib/site';
+
+const path = '/leistungen/winterdienst-gewerbe/';
+const title = 'Winterdienst Gewerbe Krefeld: Leistungen & Ablauf';
+const description =
+  'Winterdienst für Unternehmen in Krefeld: Räumen, salzfrei Streuen, 24/7-Wetterüberwachung und digitales Räumprotokoll – als Saisonpauschale oder pro Einsatz.';
+
+const leistungen = [
+  { name: 'Schneeräumung', detail: 'Gehwege, Zugänge, Treppen, Zufahrten, Parkplatz-Fahrgassen, Rampen', inkl: true },
+  { name: 'Glättebekämpfung', detail: 'Gehwege salzfrei mit Granulat oder Splitt (§ 6 Abs. 2 Satzung Krefeld), Betriebsflächen nach Absprache', inkl: true },
+  { name: 'Wetterüberwachung', detail: '24/7, automatische Tourauslösung bei Schnee, Glatteis, Reif und überfrierender Nässe', inkl: true },
+  { name: 'Kontrollgänge', detail: 'bei anhaltendem Schneefall mehrmals täglich bis 20 Uhr', inkl: true },
+  { name: 'Digitales Räumprotokoll', detail: 'Zeitstempel, GPS, Fotos, Temperatur – per E-Mail und im Kundenportal', inkl: true },
+  { name: 'Übernahme der Räum- & Streupflicht', detail: 'vertraglich für die vereinbarten Flächen', inkl: true },
+  { name: 'Frühdienst', detail: 'garantiert fertig vor 6 Uhr – für Schichtbetriebe', inkl: false },
+  { name: 'Schneeabtransport', detail: 'bei Starkschneefall, wenn Lagerflächen fehlen', inkl: false },
+  { name: 'Streugutkisten', detail: 'Bereitstellung, Befüllung und Wartung', inkl: false },
+];
+
+const ablauf = [
+  { icon: 'mail', title: 'Anfrage & Objektbegehung', text: 'Wir sehen uns Flächen, Zugänge, Gefällstrecken und Besonderheiten vor Ort an – kostenlos.' },
+  { icon: 'file-check', title: 'Räumplan & Festpreis', text: 'Sie erhalten einen Lageplan mit allen Flächen, Prioritäten und Uhrzeiten sowie ein verbindliches Angebot.' },
+  { icon: 'snowflake', title: `Saisonbetrieb ${company.season.label}`, text: `Vom ${company.season.start} bis ${company.season.end} sind wir für Sie in Bereitschaft – 7 Tage die Woche.` },
+  { icon: 'shield', title: 'Protokoll & Abrechnung', text: 'Jeder Einsatz wird dokumentiert. Abgerechnet wird pauschal oder transparent nach Einsätzen.' },
+] as const;
+
+const faq = [
+  {
+    q: 'Was ist im Winterdienst für Gewerbe enthalten?',
+    a: 'Schneeräumung und Glättebekämpfung aller vereinbarten Flächen, 24/7-Wetterüberwachung, Kontrollgänge bei anhaltendem Schneefall, das digitale Räumprotokoll und die vertragliche Übernahme der Räum- und Streupflicht. Frühdienst, Schneeabtransport und Streugutkisten sind optional.',
+  },
+  {
+    q: 'Kann ich die Räum- und Streupflicht komplett an Sie übertragen?',
+    a: 'Für die vereinbarten Flächen übernehmen wir die Pflicht per Vertrag. Eine Kontroll- und Überwachungspflicht bleibt rechtlich beim Eigentümer – unser Räumprotokoll macht diese Kontrolle einfach und nachweisbar.',
+  },
+  {
+    q: 'Saisonpauschale oder Abrechnung pro Einsatz – was lohnt sich?',
+    a: 'Die Saisonpauschale bietet volle Kostensicherheit, egal wie schneereich der Winter wird. Die Abrechnung pro Einsatz lohnt sich bei kleinen Flächen und milden Wintern. Wir rechnen Ihnen beide Varianten im Angebot vor.',
+  },
+  {
+    q: 'Räumen Sie auch an Wochenenden und Feiertagen?',
+    a: 'Ja. In Krefeld gilt die Räumpflicht auch sonn- und feiertags (ab 8 Uhr). Unsere Bereitschaft umfasst alle 7 Wochentage.',
+  },
+  {
+    q: 'Welche Streumittel verwenden Sie?',
+    a: 'Auf Gehwegen ausschließlich abstumpfende, salzfreie Mittel wie Granulat oder Splitt, wie es § 6 Abs. 2 der Krefelder Straßenreinigungssatzung vorschreibt. Für Betriebsflächen stimmen wir das Streumittel mit Ihnen ab.',
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  breadcrumbs={[{ name: 'Leistungen', path }]}
+  schema={[serviceSchema({ name: 'Winterdienst für Gewerbe in Krefeld', description, path }), faqSchema(faq)]}
+>
+  <PageHero
+    eyebrow="Leistungen"
+    title="Winterdienst für Gewerbe in Krefeld & Umgebung"
+    lead="Wir übernehmen Räumen, Streuen und Dokumentieren für Unternehmen, Handel und Hausverwaltungen – planbar zum Festpreis und mit Nachweis für jeden Einsatz."
+    image={heroImg}
+    imageAlt="Räumfahrzeug mit orangefarbenem Schneeschild im Einsatz auf verschneiter Straße"
+  >
+    <a class="btn btn-primary btn-lg" href="#anfrage">Angebot anfordern <Icon name="arrow-right" size={18} class="arrow" /></a>
+    <a class="btn btn-ghost btn-lg" href={withBase('/#rechner')}>Richtpreis berechnen</a>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Leistungsumfang</p>
+        <h2>Alle Leistungen im Überblick</h2>
+        <p class="lead">Kurz gesagt: Wir sorgen dafür, dass Ihre Flächen pünktlich sicher sind – und dass Sie es belegen können.</p>
+      </header>
+      <div class="table-wrap" data-reveal>
+        <table>
+          <thead>
+            <tr><th scope="col">Leistung</th><th scope="col">Umfang</th><th scope="col">Im Paket</th></tr>
+          </thead>
+          <tbody>
+            {
+              leistungen.map((l) => (
+                <tr>
+                  <th scope="row">{l.name}</th>
+                  <td>{l.detail}</td>
+                  <td>
+                    {l.inkl ? (
+                      <span class="inkl">
+                        <Icon name="check" size={16} strokeWidth={2.6} /> inklusive
+                      </span>
+                    ) : (
+                      <span class="opt">optional</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ablauf">
+    <div class="glow-bg" style="--glow-x: 80%; --glow-y: 50%"></div>
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Ablauf</p>
+        <h2>In 4 Schritten winterfest</h2>
+      </header>
+      <ol class="steps" data-reveal-stagger>
+        {
+          ablauf.map((s, i) => (
+            <li class="card step">
+              <span class="step-no">{String(i + 1).padStart(2, '0')}</span>
+              <span class="icon-badge">
+                <Icon name={s.icon} size={22} />
+              </span>
+              <h3>{s.title}</h3>
+              <p class="muted">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Vertragsmodelle</p>
+        <h2>Festpreis oder nach Einsatz – Sie entscheiden</h2>
+      </header>
+      <div class="grid grid-2" data-reveal-stagger>
+        <article class="card modell modell-featured">
+          <span class="modell-badge">Empfohlen</span>
+          <h3>Saisonpauschale</h3>
+          <p class="muted">Ein fester Preis für die ganze Saison – unabhängig davon, wie oft es schneit oder friert.</p>
+          <ul class="check-list">
+            <li>Volle Kostensicherheit für Ihr Budget</li>
+            <li>Keine Diskussion über Einsatzzahlen</li>
+            <li>Bevorzugte Einsatzzeiten in der Tour</li>
+          </ul>
+          <a class="btn btn-primary" href={withBase('/#rechner')}>Pauschale berechnen</a>
+        </article>
+        <article class="card modell">
+          <h3>Abrechnung pro Einsatz</h3>
+          <p class="muted">Sie zahlen nur, wenn wir ausrücken – mit Protokoll zu jedem abgerechneten Einsatz.</p>
+          <ul class="check-list">
+            <li>Günstig in milden Wintern</li>
+            <li>Für kleine Flächen und Nebenobjekte</li>
+            <li>Volle Transparenz durch Protokolle</li>
+          </ul>
+          <a class="btn btn-ghost" href="#anfrage">Angebot anfordern</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <Zielgruppen />
+  <Faq items={faq} title="Fragen zum Winterdienst für Gewerbe" />
+  <AnfrageForm />
+</BaseLayout>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .table-wrap table {
+    min-width: 640px;
+  }
+
+  .table-wrap th[scope='row'] {
+    background: none;
+    white-space: nowrap;
+  }
+
+  .table-wrap tr:last-child th,
+  .table-wrap tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .table-wrap td {
+    color: var(--text-2);
+  }
+
+  .inkl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--ok);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .opt {
+    color: var(--ice);
+    font-weight: 600;
+  }
+
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: clamp(16px, 2vw, 24px);
+  }
+
+  .step {
+    position: relative;
+  }
+
+  .step-no {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: rgb(125 211 252 / 0.15);
+    line-height: 1;
+  }
+
+  .modell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .modell .btn {
+    margin-top: 1.4rem;
+    align-self: flex-start;
+  }
+
+  .modell-featured {
+    border-color: rgb(125 211 252 / 0.45);
+    box-shadow: var(--glow);
+  }
+
+  .modell-badge {
+    align-self: flex-start;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--grad-ice);
+    color: #03111f;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+</style>

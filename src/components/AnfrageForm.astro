@@ -1,0 +1,351 @@
+---
+/**
+ * Anfrageformular. DEMO: validiert und zeigt eine Erfolgsmeldung, sendet aber
+ * nichts. Für den Livegang: action auf einen Formular-Dienst oder ein eigenes
+ * Backend zeigen lassen + Datenschutzhinweis anpassen.
+ */
+import { company } from '../data/company';
+import { orte } from '../data/orte';
+import { withBase } from '../lib/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  title?: string;
+}
+const { title = `Sichern Sie sich Ihren Tourplatz für die ${company.season.label}` } = Astro.props;
+---
+
+<section class="section anfrage" id="anfrage">
+  <div class="glow-bg" style="--glow-x: 30%; --glow-y: 60%"></div>
+  <div class="container anfrage-layout">
+    <div class="anfrage-intro" data-reveal>
+      <p class="eyebrow">Angebot anfordern</p>
+      <h2>{title}</h2>
+      <p class="lead">
+        Die Touren für den Winter werden jetzt geplant. Wer früh dabei ist, bekommt die besten Einsatzzeiten – und muss sich
+        ab November um nichts mehr kümmern.
+      </p>
+      <ol class="anfrage-steps">
+        <li><strong>Anfrage senden</strong><span>dauert 2 Minuten</span></li>
+        <li><strong>Kostenlose Objektbegehung</strong><span>Flächen, Zugänge, Besonderheiten</span></li>
+        <li><strong>Festpreis-Angebot & Räumplan</strong><span>verbindlich, ohne versteckte Kosten</span></li>
+      </ol>
+      <div class="anfrage-direct">
+        <a href={`tel:${company.phone}`} class="direct-link">
+          <Icon name="phone" size={20} />
+          <span><small>Lieber direkt sprechen?</small>{company.phoneDisplay}</span>
+        </a>
+        <a href={`mailto:${company.email}`} class="direct-link">
+          <Icon name="mail" size={20} />
+          <span><small>E-Mail</small>{company.email}</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="card form-card" data-reveal>
+      <form class="form" novalidate data-anfrage-form>
+        <input type="hidden" name="quelle" value="Formular" />
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-firma">Firma / Verwaltung *</label>
+            <input id="f-firma" name="firma" autocomplete="organization" required />
+            <p class="error" data-error-for="firma"></p>
+          </div>
+          <div class="field">
+            <label for="f-name">Ansprechpartner:in *</label>
+            <input id="f-name" name="name" autocomplete="name" required />
+            <p class="error" data-error-for="name"></p>
+          </div>
+          <div class="field">
+            <label for="f-email">E-Mail *</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" required />
+            <p class="error" data-error-for="email"></p>
+          </div>
+          <div class="field">
+            <label for="f-tel">Telefon</label>
+            <input id="f-tel" name="telefon" type="tel" autocomplete="tel" />
+            <p class="error" data-error-for="telefon"></p>
+          </div>
+          <div class="field">
+            <label for="f-ort">Standort des Objekts *</label>
+            <select id="f-ort" name="ort" required>
+              <option value="">Bitte wählen</option>
+              {orte.map((o) => <option value={o.name}>{o.name}</option>)}
+              <option value="anderer">Anderer Ort</option>
+            </select>
+            <p class="error" data-error-for="ort"></p>
+          </div>
+          <div class="field">
+            <label for="f-flaeche">Fläche ca. (m²)</label>
+            <input id="f-flaeche" name="flaeche" type="number" min="1" inputmode="numeric" />
+            <p class="error" data-error-for="flaeche"></p>
+          </div>
+          <div class="field field-full">
+            <label for="f-nachricht">Ihre Nachricht</label>
+            <textarea id="f-nachricht" name="nachricht" rows="5" placeholder="z. B. Gehweg 40 m, Kundenparkplatz mit 30 Stellplätzen, Öffnung 7:30 Uhr"></textarea>
+          </div>
+          <div class="field field-full">
+            <label class="consent">
+              <input type="checkbox" name="datenschutz" required />
+              <span>
+                Ich bin einverstanden, dass meine Angaben zur Bearbeitung der Anfrage verwendet werden. Details in der
+                <a href={withBase('/datenschutz/')}>Datenschutzerklärung</a>. *
+              </span>
+            </label>
+            <p class="error" data-error-for="datenschutz"></p>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg form-submit">
+          Unverbindliches Angebot anfordern <Icon name="arrow-right" size={18} class="arrow" />
+        </button>
+        <p class="form-note small muted">Antwort innerhalb von 24 Stunden an Werktagen. * Pflichtfeld</p>
+      </form>
+
+      <div class="form-success" data-success hidden tabindex="-1">
+        <span class="success-icon"><Icon name="check" size={34} strokeWidth={2.4} /></span>
+        <h3>Vielen Dank für Ihre Anfrage!</h3>
+        <p>Wir melden uns innerhalb von 24 Stunden, um einen Termin für die kostenlose Objektbegehung zu vereinbaren.</p>
+        <p class="demo-note"><Icon name="alert" size={15} /> Demo-Hinweis: Es wurden keine Daten versendet.</p>
+        <button type="button" class="btn btn-ghost btn-sm" data-reset>Neue Anfrage</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .anfrage-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  .anfrage-steps {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+    display: grid;
+    gap: 1rem;
+    counter-reset: s;
+  }
+
+  .anfrage-steps li {
+    position: relative;
+    display: grid;
+    padding-left: 3.2rem;
+    counter-increment: s;
+  }
+
+  .anfrage-steps li::before {
+    content: counter(s);
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--grad-ice);
+    color: #03111f;
+    font-weight: 700;
+  }
+
+  .anfrage-steps span {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .anfrage-direct {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .direct-link {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    word-break: break-word;
+    transition: border-color 0.25s;
+  }
+
+  .direct-link:hover {
+    border-color: var(--ice);
+    color: var(--text);
+  }
+
+  .direct-link :global(svg) {
+    color: var(--ice);
+    flex: none;
+  }
+
+  .direct-link small {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .form-card {
+    padding: clamp(24px, 3.5vw, 44px);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 1rem;
+  }
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+
+  .consent {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    gap: 0.7rem;
+    align-items: start;
+    font-weight: 400 !important;
+    font-size: 0.85rem !important;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+
+  .consent input {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--ice-2);
+  }
+
+  .form-submit {
+    width: 100%;
+    margin-top: 0.8rem;
+    white-space: normal;
+  }
+
+  .form-note {
+    text-align: center;
+    margin: 0.9rem 0 0;
+  }
+
+  :global(.is-prefilled) {
+    border-color: var(--ice) !important;
+    box-shadow: 0 0 0 4px rgb(125 211 252 / 0.18);
+  }
+
+  .form-success {
+    text-align: center;
+    padding: 2rem 0;
+    animation: pop 0.6s var(--ease-out) both;
+  }
+
+  .form-success[hidden] {
+    display: none;
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  .success-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--grad-ice);
+    color: #03111f;
+    margin-bottom: 1.2rem;
+    box-shadow: var(--glow);
+  }
+
+  .demo-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px dashed rgb(240 171 252 / 0.5);
+    color: #f5d0fe;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 960px) {
+    .anfrage-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-anfrage-form]');
+  const success = document.querySelector<HTMLElement>('[data-success]');
+
+  const messages: Record<string, string> = {
+    firma: 'Bitte geben Sie Ihre Firma oder Verwaltung an.',
+    name: 'Bitte geben Sie eine Ansprechperson an.',
+    email: 'Bitte geben Sie eine gültige E-Mail-Adresse an.',
+    ort: 'Bitte wählen Sie den Standort des Objekts.',
+    datenschutz: 'Bitte stimmen Sie der Verarbeitung Ihrer Angaben zu.',
+  };
+
+  function validateField(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
+    const error = form?.querySelector<HTMLElement>(`[data-error-for="${field.name}"]`);
+    const valid = field.checkValidity();
+    field.setAttribute('aria-invalid', String(!valid));
+    if (error) {
+      error.textContent = valid ? '' : (messages[field.name] ?? 'Bitte prüfen Sie diese Eingabe.');
+      if (!error.id) error.id = `err-${field.name}`;
+      field.setAttribute('aria-describedby', error.id);
+    }
+    return valid;
+  }
+
+  if (form && success) {
+    const fields = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[required]')];
+
+    fields.forEach((f) =>
+      f.addEventListener('blur', () => {
+        if (f.value || f.getAttribute('aria-invalid')) validateField(f);
+      }),
+    );
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const results = fields.map(validateField);
+      const firstInvalid = fields[results.indexOf(false)];
+      if (firstInvalid) {
+        firstInvalid.focus();
+        return;
+      }
+      // DEMO: hier würde die Anfrage an einen Formular-Dienst / ein Backend gehen
+      form.hidden = true;
+      success.hidden = false;
+      success.focus();
+    });
+
+    success.querySelector('[data-reset]')?.addEventListener('click', () => {
+      form.reset();
+      form.querySelectorAll('.is-prefilled').forEach((el) => el.classList.remove('is-prefilled'));
+      success.hidden = true;
+      form.hidden = false;
+    });
+  }
+</script>

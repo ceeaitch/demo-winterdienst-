@@ -1,0 +1,575 @@
+---
+/**
+ * Pflicht-Check: 4 Fragen → Risiko-Einstufung + persönliche Pflichten-Liste.
+ * Die Fragen stehen als Daten im Frontmatter, das Bewertungsskript liest sie
+ * über ein data-Attribut (keine Duplikate zwischen HTML und JS).
+ */
+import Icon from '../Icon.astro';
+
+const fragen = [
+  {
+    id: 'rolle',
+    frage: 'Wer sind Sie?',
+    optionen: [
+      { id: 'eigentuemer', label: 'Unternehmen mit eigener Immobilie', icon: 'building', punkte: 25 },
+      { id: 'handel', label: 'Handel / Gastro mit Kundenparkplatz', icon: 'store', punkte: 30 },
+      { id: 'vermieter', label: 'Vermieter, Hausverwaltung oder WEG', icon: 'home', punkte: 30 },
+      { id: 'mieter', label: 'Mieter einer Gewerbefläche', icon: 'users', punkte: 15 },
+    ],
+  },
+  {
+    id: 'gehweg',
+    frage: 'Grenzt Ihr Grundstück an einen öffentlichen Gehweg?',
+    optionen: [
+      { id: 'ja', label: 'Ja', icon: 'check', punkte: 25 },
+      { id: 'unsicher', label: 'Weiß ich nicht genau', icon: 'search', punkte: 15 },
+      { id: 'nein', label: 'Nein', icon: 'x', punkte: 5 },
+    ],
+  },
+  {
+    id: 'verkehr',
+    frage: 'Sind vor 8 Uhr Menschen auf Ihrem Gelände unterwegs?',
+    hint: 'Mitarbeitende, Kunden, Patienten, Lieferanten, Bewohner',
+    optionen: [
+      { id: 'taeglich', label: 'Ja, täglich', icon: 'users', punkte: 25 },
+      { id: 'manchmal', label: 'Gelegentlich', icon: 'calendar', punkte: 12 },
+      { id: 'nein', label: 'Eher nicht', icon: 'moon', punkte: 3 },
+    ],
+  },
+  {
+    id: 'organisation',
+    frage: 'Wie ist Ihr Winterdienst heute organisiert?',
+    optionen: [
+      { id: 'selbst', label: 'Wir räumen selbst / Hausmeister', icon: 'users', punkte: 15 },
+      { id: 'ohne', label: 'Dienstleister, aber ohne Protokoll', icon: 'truck', punkte: 15 },
+      { id: 'mit', label: 'Dienstleister mit digitalem Protokoll', icon: 'file-check', punkte: 0 },
+      { id: 'offen', label: 'Noch gar nicht geregelt', icon: 'alert', punkte: 25 },
+    ],
+  },
+] as const;
+
+const total = fragen.length;
+---
+
+<section class="section pflicht" id="pflicht-check">
+  <div class="glow-bg" style="--glow-x: 85%; --glow-y: 40%"></div>
+  <div class="container pc-layout">
+    <header class="pc-intro" data-reveal>
+      <p class="eyebrow">Pflicht-Check</p>
+      <h2>Wie hoch ist Ihr Haftungsrisiko diesen Winter?</h2>
+      <p class="lead">
+        Vier Fragen, 60 Sekunden – danach wissen Sie, welche Pflichten Sie in Krefeld und Umgebung konkret treffen
+        und wo Ihre Lücken liegen.
+      </p>
+      <ul class="check-list">
+        <li>Anonym, ohne Anmeldung</li>
+        <li>Persönliche Pflichten-Liste mit Rechtsquelle</li>
+        <li>Ergebnis direkt als Anfrage übernehmen</li>
+      </ul>
+    </header>
+
+    <div class="card pc-card" data-pflicht-check data-fragen={JSON.stringify(fragen)} data-reveal>
+      <div class="pc-progress" aria-hidden="true"><span data-pc-bar></span></div>
+
+      {
+        fragen.map((f, i) => (
+          <fieldset class:list={['pc-step', { 'is-active': i === 0 }]} data-step={i}>
+            <legend>
+              <span class="pc-count">
+                Frage {i + 1} von {total}
+              </span>
+              <span class="pc-question">{f.frage}</span>
+            </legend>
+            {'hint' in f && <p class="pc-hint">{f.hint}</p>}
+            <div class="pc-options">
+              {f.optionen.map((o) => (
+                <button type="button" class="pc-option" data-frage={f.id} data-option={o.id}>
+                  <span class="pc-option-icon">
+                    <Icon name={o.icon} size={20} />
+                  </span>
+                  <span>{o.label}</span>
+                </button>
+              ))}
+            </div>
+            {i > 0 && (
+              <button type="button" class="pc-back" data-back>
+                ← Zurück
+              </button>
+            )}
+          </fieldset>
+        ))
+      }
+
+      <div class="pc-result" data-result hidden>
+        <div class="pc-gauge">
+          <svg viewBox="0 0 200 116" aria-hidden="true">
+            <defs>
+              <linearGradient id="pc-grad" x1="0" x2="1">
+                <stop offset="0" stop-color="#34d399"></stop>
+                <stop offset="0.5" stop-color="#fbbf24"></stop>
+                <stop offset="1" stop-color="#fb7185"></stop>
+              </linearGradient>
+            </defs>
+            <path class="pc-gauge-track" d="M20 100 A80 80 0 0 1 180 100"></path>
+            <path class="pc-gauge-value" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" data-gauge></path>
+          </svg>
+          <p class="pc-score"><span data-score>0</span><small>/100</small></p>
+        </div>
+        <p class="pc-level" data-level></p>
+        <p class="pc-summary" data-summary></p>
+        <h3 class="pc-list-title">Ihre Pflichten & Handlungsfelder</h3>
+        <ul class="pc-list" data-list></ul>
+        <div class="pc-actions">
+          <button type="button" class="btn btn-primary" data-to-form>
+            Angebot mit diesem Ergebnis anfordern <Icon name="arrow-right" size={18} class="arrow" />
+          </button>
+          <button type="button" class="btn btn-ghost" data-restart>
+            <Icon name="refresh" size={16} /> Neu starten
+          </button>
+        </div>
+        <p class="legal-note">Ersteinschätzung, keine Rechtsberatung.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pc-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  .pc-intro {
+    position: sticky;
+    top: calc(var(--header-h) + 40px);
+  }
+
+  .pc-card {
+    padding: clamp(24px, 3.5vw, 44px);
+    min-height: 460px;
+    overflow: hidden;
+  }
+
+  .pc-progress {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--surface-2);
+  }
+
+  .pc-progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--grad-ice);
+    transition: width 0.6s var(--ease-out);
+  }
+
+  .pc-step {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  :global(.js) .pc-step:not(.is-active) {
+    display: none;
+  }
+
+  :global(.js) .pc-step.is-active {
+    animation: step-in 0.55s var(--ease-out) both;
+  }
+
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateX(28px);
+    }
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 1.4rem;
+  }
+
+  .pc-count {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin-bottom: 0.6rem;
+  }
+
+  .pc-question {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.1rem + 1vw, 1.8rem);
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .pc-hint {
+    margin: -0.8rem 0 1.2rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .pc-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 0.75rem;
+  }
+
+  .pc-option {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 68px;
+    padding: 0.9rem 1rem;
+    text-align: left;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: rgb(5 10 22 / 0.45);
+    color: var(--text);
+    font: 550 0.98rem/1.35 var(--font-sans);
+    cursor: pointer;
+    transition:
+      border-color 0.25s,
+      background 0.25s,
+      transform 0.35s var(--ease-out);
+  }
+
+  .pc-option:hover {
+    border-color: var(--ice);
+    background: rgb(125 211 252 / 0.08);
+    transform: translateY(-2px);
+  }
+
+  .pc-option[aria-pressed='true'] {
+    border-color: var(--ice);
+    background: rgb(125 211 252 / 0.14);
+  }
+
+  .pc-option-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: 12px;
+    background: rgb(125 211 252 / 0.12);
+    color: var(--ice);
+  }
+
+  .pc-back {
+    margin-top: 1.4rem;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font: inherit;
+    padding: 0.4rem 0;
+  }
+
+  .pc-back:hover {
+    color: var(--text);
+  }
+
+  /* --- Ergebnis --- */
+  .pc-result {
+    animation: step-in 0.6s var(--ease-out) both;
+  }
+
+  .pc-result[hidden] {
+    display: none;
+  }
+
+  .pc-gauge {
+    position: relative;
+    width: min(260px, 100%);
+    margin: 0 auto;
+  }
+
+  .pc-gauge path {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
+  }
+
+  .pc-gauge-track {
+    stroke: var(--surface-2);
+  }
+
+  .pc-gauge-value {
+    stroke: url(#pc-grad);
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 1.6s var(--ease-out);
+  }
+
+  .pc-score {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .pc-score small {
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  .pc-level {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 650;
+    margin: 1rem 0 0.4rem;
+  }
+
+  .pc-level[data-tone='hoch'] {
+    color: var(--danger);
+  }
+
+  .pc-level[data-tone='mittel'] {
+    color: var(--warn);
+  }
+
+  .pc-level[data-tone='gering'] {
+    color: var(--ok);
+  }
+
+  .pc-summary {
+    text-align: center;
+    color: var(--text-2);
+    max-width: 520px;
+    margin-inline: auto;
+  }
+
+  .pc-list-title {
+    font-size: 1rem;
+    margin: 1.6rem 0 0.8rem;
+    font-family: var(--font-sans);
+    font-weight: 650;
+  }
+
+  .pc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .pc-list :global(li) {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-sm);
+    background: rgb(5 10 22 / 0.5);
+    border: 1px solid var(--border);
+    font-size: 0.94rem;
+    line-height: 1.5;
+    animation: step-in 0.5s var(--ease-out) both;
+  }
+
+  .pc-list :global(li small) {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .pc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.6rem;
+  }
+
+  @media (max-width: 960px) {
+    .pc-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .pc-intro {
+      position: static;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .pc-actions .btn {
+      width: 100%;
+      white-space: normal;
+    }
+  }
+</style>
+
+<script>
+  import { prefillAnfrage } from '../../scripts/prefill';
+
+  type Option = { id: string; label: string; punkte: number };
+  type Frage = { id: string; frage: string; optionen: Option[] };
+
+  const card = document.querySelector<HTMLElement>('[data-pflicht-check]');
+
+  if (card) {
+    const fragen: Frage[] = JSON.parse(card.dataset.fragen ?? '[]');
+    const steps = [...card.querySelectorAll<HTMLElement>('.pc-step')];
+    const result = card.querySelector<HTMLElement>('[data-result]')!;
+    const bar = card.querySelector<HTMLElement>('[data-pc-bar]')!;
+    const answers: Record<string, string> = {};
+    let current = 0;
+    let summaryText = '';
+
+    const show = (i: number) => {
+      current = i;
+      steps.forEach((s, idx) => s.classList.toggle('is-active', idx === i));
+      result.hidden = true;
+      bar.style.width = `${(i / fragen.length) * 100}%`;
+    };
+
+    // Pflichten-Bausteine je nach Antwort – mit Rechtsquelle
+    function pflichten(a: Record<string, string>): string[] {
+      const out: string[] = [];
+      if (a.gehweg !== 'nein') {
+        out.push(
+          'Gehweg vor Ihrem Grundstück: in Krefeld werktags 7–20 Uhr, sonn- und feiertags 8–20 Uhr räumen und streuen, bei Bedarf mehrmals täglich.<small>Straßenreinigungssatzung Krefeld · andere Städte haben eigene Satzungen</small>',
+        );
+        out.push(
+          'Kein Streusalz auf Geh- und Radwegen – nur Sand, Splitt oder Granulat.<small>§ 6 Abs. 2 Straßenreinigungssatzung Krefeld</small>',
+        );
+      }
+      if (a.rolle === 'handel') {
+        out.push(
+          'Kundenparkplatz: Fahrgassen und Wege zum Eingang sichern – nicht zwingend jede Stellfläche.<small>BGH, Urteil vom 02.07.2019, VI ZR 184/18</small>',
+        );
+      }
+      if (a.rolle === 'vermieter') {
+        out.push(
+          'Als Vermieter haften Sie gegenüber Mietern für Fehler Ihres beauftragten Winterdienstes wie für eigene.<small>BGH, Urteil vom 06.08.2025, VIII ZR 250/23</small>',
+        );
+      }
+      if (a.rolle === 'mieter') {
+        out.push(
+          'Prüfen Sie Ihren Mietvertrag: Die Räum- und Streupflicht wird häufig auf Gewerbemieter übertragen.<small>Vertragliche Regelung im Einzelfall</small>',
+        );
+      }
+      if (a.verkehr === 'taeglich') {
+        out.push(
+          'Frühverkehr vor 8 Uhr: Zugänge, Parkplätze und Rampen müssen vor Schicht- bzw. Öffnungsbeginn sicher sein.<small>Verkehrssicherungspflicht, § 823 BGB</small>',
+        );
+      }
+      if (a.organisation === 'selbst') {
+        out.push(
+          'Eigene Leute brauchen eine Vertretung bei Krankheit, Urlaub und am Wochenende – und Streugut, das der Satzung entspricht.<small>Organisationspflicht des Eigentümers</small>',
+        );
+      }
+      if (a.organisation === 'ohne') {
+        out.push(
+          'Ohne Protokoll fehlt Ihnen im Streitfall der Nachweis, dass Sie Ihren Dienstleister kontrolliert haben.<small>Auswahl- und Überwachungspflicht bei Delegation</small>',
+        );
+      }
+      if (a.organisation === 'offen') {
+        out.push(
+          'Akuter Handlungsbedarf: Ohne Regelung haften Sie bei jedem Glätteunfall direkt.<small>§ 823 BGB · Saisonstart 1. November</small>',
+        );
+      }
+      if (a.organisation === 'mit') {
+        out.push(
+          'Gut aufgestellt: Achten Sie darauf, dass Protokolle Zeit, Ort und Maßnahme belegen und dass Sie sie stichprobenartig prüfen.<small>Kontrollpflicht bleibt beim Eigentümer</small>',
+        );
+      }
+      return out;
+    }
+
+    function finish() {
+      let score = 0;
+      for (const f of fragen) {
+        score += f.optionen.find((o) => o.id === answers[f.id])?.punkte ?? 0;
+      }
+      score = Math.min(100, score);
+      const tone = score >= 70 ? 'hoch' : score >= 40 ? 'mittel' : 'gering';
+      const summaries = {
+        hoch: 'Sie tragen ein hohes Haftungsrisiko. Ein professioneller Winterdienst mit Nachweis ist dringend zu empfehlen – idealerweise vor Saisonstart am 1. November.',
+        mittel:
+          'Ihr Risiko ist spürbar. Mit festen Zuständigkeiten und dokumentierten Einsätzen schließen Sie die Lücken.',
+        gering: 'Ihr Risiko ist überschaubar. Prüfen Sie trotzdem, ob Ihre Einsätze nachweisbar dokumentiert sind.',
+      } as const;
+
+      steps.forEach((s) => s.classList.remove('is-active'));
+      result.hidden = false;
+      bar.style.width = '100%';
+
+      const level = result.querySelector<HTMLElement>('[data-level]')!;
+      level.dataset.tone = tone;
+      level.textContent = `Haftungsrisiko: ${tone}`;
+      result.querySelector('[data-summary]')!.textContent = summaries[tone];
+
+      const list = result.querySelector<HTMLElement>('[data-list]')!;
+      const items = pflichten(answers);
+      list.innerHTML = items.map((t, i) => `<li style="animation-delay:${0.3 + i * 0.08}s">${t}</li>`).join('');
+
+      // Tacho + Zahl animieren
+      const gauge = result.querySelector<SVGPathElement>('[data-gauge]')!;
+      const scoreEl = result.querySelector<HTMLElement>('[data-score]')!;
+      gauge.style.strokeDashoffset = '100';
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          gauge.style.strokeDashoffset = String(100 - score);
+        }),
+      );
+      const t0 = performance.now();
+      const tick = (t: number) => {
+        const p = Math.min(1, (t - t0) / 1400);
+        scoreEl.textContent = String(Math.round(score * (1 - (1 - p) ** 3)));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+
+      const antworten = fragen
+        .map((f) => `• ${f.frage} ${f.optionen.find((o) => o.id === answers[f.id])?.label ?? ''}`)
+        .join('\n');
+      summaryText = `Pflicht-Check-Ergebnis: Haftungsrisiko ${tone} (${score}/100)\n${antworten}\n\nBitte um ein Angebot und eine kostenlose Objektbegehung.`;
+      result.querySelector<HTMLElement>('[data-to-form]')?.focus({ preventScroll: true });
+
+      // Ergebnis-Karte so scrollen, dass der Tacho sichtbar ist
+      const cardTop = card!.getBoundingClientRect().top;
+      if (cardTop < 90) {
+        const y = cardTop + window.scrollY - 100;
+        if (window.lenis) window.lenis.scrollTo(y);
+        else window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+
+    card.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const option = target.closest<HTMLButtonElement>('.pc-option');
+      if (option) {
+        const frage = option.dataset.frage!;
+        answers[frage] = option.dataset.option!;
+        option.parentElement?.querySelectorAll('.pc-option').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+        option.setAttribute('aria-pressed', 'true');
+        window.setTimeout(() => (current < fragen.length - 1 ? show(current + 1) : finish()), 220);
+        return;
+      }
+      if (target.closest('[data-back]')) show(Math.max(0, current - 1));
+      if (target.closest('[data-restart]')) {
+        Object.keys(answers).forEach((k) => delete answers[k]);
+        card.querySelectorAll('.pc-option').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+        show(0);
+      }
+      if (target.closest('[data-to-form]')) prefillAnfrage({ nachricht: summaryText, quelle: 'Pflicht-Check' });
+    });
+  }
+</script>

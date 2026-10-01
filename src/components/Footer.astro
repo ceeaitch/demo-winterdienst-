@@ -1,0 +1,203 @@
+---
+import { DEMO_MODE, company, imageCredits } from '../data/company';
+import { orte, orteMitSeite } from '../data/orte';
+import { withBase } from '../lib/site';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+
+const weitereOrte = orte.filter((o) => !o.page).slice(0, 8);
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href={withBase('/')} aria-label={`${company.name} – Startseite`}><Logo uid="f" /></a>
+        <p class="muted small">{company.description}</p>
+        <address class="nap">
+          <strong>{company.name}</strong><br />
+          {company.address.street}<br />
+          {company.address.zip} {company.address.city}<br />
+          <a href={`tel:${company.phone}`}><Icon name="phone" size={15} /> {company.phoneDisplay}</a><br />
+          <a href={`mailto:${company.email}`}><Icon name="mail" size={15} /> {company.email}</a>
+        </address>
+      </div>
+
+      <nav aria-label="Leistungen">
+        <h2 class="footer-title">Leistungen</h2>
+        <ul>
+          <li><a href={withBase('/leistungen/winterdienst-gewerbe/')}>Winterdienst für Gewerbe</a></li>
+          <li><a href={withBase('/#rechner')}>Kostenrechner</a></li>
+          <li><a href={withBase('/#pflicht-check')}>Pflicht-Check</a></li>
+          <li><a href={withBase('/ratgeber/raeumpflicht-krefeld/')}>Ratgeber Räumpflicht Krefeld</a></li>
+          <li><a href={withBase('/kontakt/')}>Kontakt & Angebot</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Einsatzgebiet">
+        <h2 class="footer-title">Einsatzgebiet</h2>
+        <ul>
+          {
+            orteMitSeite.map((o) => (
+              <li>
+                <a href={withBase(`/einsatzgebiet/${o.slug}/`)}>Winterdienst {o.name}</a>
+              </li>
+            ))
+          }
+          {weitereOrte.map((o) => <li class="muted">{o.name}</li>)}
+          <li><a href={withBase('/einsatzgebiet/')}>Alle Orte im 20-km-Umkreis →</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <h2 class="footer-title">Saison</h2>
+        <p class="small muted">
+          {company.season.label}: {company.season.start} bis {company.season.end}.<br />
+          Einsatzbereitschaft 7 Tage die Woche, Wetterüberwachung rund um die Uhr.
+        </p>
+        <a class="btn btn-primary btn-sm" href={withBase('/#anfrage')}>Angebot anfordern</a>
+      </div>
+    </div>
+
+    <details class="credits">
+      <summary>Bildnachweise</summary>
+      <ul>
+        {
+          imageCredits.map((c) => (
+            <li>
+              {c.motiv}: <a href={c.url} rel="noopener" target="_blank">{c.author}</a> / Unsplash
+            </li>
+          ))
+        }
+      </ul>
+    </details>
+
+    <div class="footer-bottom">
+      <p class="small muted">
+        © 2026 {company.name}{DEMO_MODE && ' · Demo-Website mit fiktivem Unternehmen'}
+      </p>
+      <ul class="legal-links">
+        <li><a href={withBase('/impressum/')}>Impressum</a></li>
+        <li><a href={withBase('/datenschutz/')}>Datenschutz</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg) 0%, #03070f 100%);
+    padding: clamp(56px, 8vw, 96px) 0 calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: clamp(28px, 4vw, 56px);
+  }
+
+  .footer-brand > a {
+    display: inline-block;
+    text-decoration: none;
+    margin-bottom: 1rem;
+  }
+
+  .footer-title {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin-bottom: 1rem;
+  }
+
+  .site-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .site-footer a {
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  .site-footer a:hover {
+    color: var(--text);
+  }
+
+  .site-footer .btn-primary {
+    color: #03111f;
+    margin-top: 0.5rem;
+  }
+
+  .nap {
+    font-style: normal;
+    font-size: 0.92rem;
+    color: var(--text-2);
+    line-height: 1.8;
+  }
+
+  .nap a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .credits {
+    margin-top: 3rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .credits summary {
+    cursor: pointer;
+    width: fit-content;
+  }
+
+  .credits ul {
+    margin-top: 0.8rem;
+    font-size: 0.82rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-bottom p {
+    margin: 0;
+  }
+
+  .legal-links {
+    display: flex !important;
+    gap: 1.5rem !important;
+  }
+
+  @media (max-width: 900px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

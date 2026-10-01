@@ -1,0 +1,516 @@
+---
+/**
+ * Präsentations-Werkzeugleiste – nur im DEMO_MODE sichtbar.
+ *  - Frostnacht simulieren: zeigt Glättealarm (Ampel, Banner, Schneefall)
+ *  - SEO-Röntgenblick: macht Überschriften, Keywords & strukturierte Daten sichtbar
+ *  - QR-Code: Kunde öffnet die Demo direkt auf dem eigenen Handy
+ */
+import QRCode from 'qrcode';
+import { company } from '../data/company';
+import { orte } from '../data/orte';
+import Icon from './Icon.astro';
+
+const qrSvg = await QRCode.toString(company.liveUrl, {
+  type: 'svg',
+  margin: 1,
+  color: { dark: '#050a16', light: '#ffffff' },
+});
+
+// Lokale Keywords, die der Röntgenblick hervorhebt
+const keywords = [
+  'Winterdienst',
+  'Räumpflicht',
+  'Streupflicht',
+  'Glätte',
+  'Krefeld',
+  // „Mitte“ wäre zu allgemein und würde auch in normalen Wörtern markiert
+  ...new Set(orte.map((o) => o.name.replace('Krefeld-', '')).filter((n) => n !== 'Mitte')),
+];
+---
+
+<div class="demo-toolbar" data-demo-toolbar data-keywords={JSON.stringify(keywords)}>
+  <button class="demo-fab" type="button" aria-expanded="false" aria-controls="demo-panel" aria-label="Präsentations-Werkzeuge öffnen">
+    <Icon name="sparkles" size={18} />
+    <span>Demo</span>
+  </button>
+
+  <div class="demo-panel" id="demo-panel" role="dialog" aria-label="Präsentations-Werkzeuge" hidden>
+    <p class="demo-title">Präsentations-Modus</p>
+
+    <button class="demo-switch" type="button" role="switch" aria-checked="false" data-toggle="frost">
+      <span class="demo-switch-icon"><Icon name="snowflake" size={18} /></span>
+      <span class="demo-switch-text">
+        <strong>Frostnacht simulieren</strong>
+        <small>Ampel, Banner & Schneefall auf Alarm</small>
+      </span>
+      <span class="demo-switch-knob" aria-hidden="true"></span>
+    </button>
+
+    <button class="demo-switch" type="button" role="switch" aria-checked="false" data-toggle="xray">
+      <span class="demo-switch-icon"><Icon name="search" size={18} /></span>
+      <span class="demo-switch-text">
+        <strong>SEO-Röntgenblick</strong>
+        <small>Unsichtbare SEO-Arbeit sichtbar machen</small>
+      </span>
+      <span class="demo-switch-knob" aria-hidden="true"></span>
+    </button>
+
+    <details class="demo-qr">
+      <summary><Icon name="qr" size={18} /> Auf dem Handy öffnen</summary>
+      <div class="qr-box" set:html={qrSvg} />
+      <p class="small muted">{company.liveUrl.replace('https://', '')}</p>
+    </details>
+
+    <p class="demo-hint">Nur in der Demo sichtbar · fiktives Unternehmen</p>
+  </div>
+
+  <aside class="xray-panel" aria-label="SEO-Analyse dieser Seite" hidden data-xray-panel>
+    <div class="xray-head">
+      <p><Icon name="search" size={16} /> SEO-Röntgenblick</p>
+      <button type="button" class="xray-close" aria-label="Röntgenblick schließen"><Icon name="x" size={18} /></button>
+    </div>
+    <div class="xray-body" data-xray-body></div>
+  </aside>
+</div>
+
+<style>
+  .demo-toolbar {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 150;
+    font-size: 0.9rem;
+  }
+
+  .demo-fab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.05rem;
+    border-radius: 999px;
+    border: 1px solid rgb(240 171 252 / 0.5);
+    background: linear-gradient(135deg, rgb(88 28 135 / 0.9), rgb(30 27 75 / 0.92));
+    color: #fae8ff;
+    font: 600 0.88rem/1 var(--font-sans);
+    cursor: pointer;
+    box-shadow: 0 12px 30px -10px rgb(192 38 211 / 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .demo-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 12px);
+    width: min(330px, calc(100vw - 32px));
+    padding: 1rem;
+    border-radius: 18px;
+    border: 1px solid rgb(240 171 252 / 0.35);
+    background: rgb(12 10 32 / 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow);
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .demo-panel[hidden] {
+    display: none;
+  }
+
+  .demo-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #f0abfc;
+    font-weight: 700;
+  }
+
+  .demo-switch {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .demo-switch:hover {
+    border-color: var(--border-strong);
+  }
+
+  .demo-switch-icon {
+    color: #f0abfc;
+  }
+
+  .demo-switch-text {
+    display: grid;
+    line-height: 1.3;
+  }
+
+  .demo-switch-text small {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .demo-switch-knob {
+    width: 40px;
+    height: 23px;
+    border-radius: 999px;
+    background: rgb(148 163 184 / 0.35);
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .demo-switch-knob::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .demo-switch[aria-checked='true'] .demo-switch-knob {
+    background: #c026d3;
+  }
+
+  .demo-switch[aria-checked='true'] .demo-switch-knob::after {
+    transform: translateX(17px);
+  }
+
+  .demo-qr summary {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+    color: var(--text-2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .qr-box {
+    width: 180px;
+    margin: 0.8rem auto 0.4rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .demo-qr p {
+    text-align: center;
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .demo-hint {
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* --- SEO-Analyse-Panel --- */
+  .xray-panel {
+    position: fixed;
+    left: max(16px, env(safe-area-inset-left));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: min(380px, calc(100vw - 32px));
+    max-height: min(70vh, 640px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-radius: 18px;
+    border: 1px solid rgb(240 171 252 / 0.4);
+    background: rgb(12 10 32 / 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow);
+    font-size: 0.85rem;
+  }
+
+  .xray-panel[hidden] {
+    display: none;
+  }
+
+  .xray-head {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    background: rgb(12 10 32 / 0.98);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .xray-head p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: #f0abfc;
+  }
+
+  .xray-close {
+    background: none;
+    border: 0;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .xray-body {
+    padding: 0.8rem 1rem 1rem;
+  }
+
+  .xray-body :global(.xr-row) {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 0.5rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .xray-body :global(.xr-row:last-child) {
+    border-bottom: 0;
+  }
+
+  .xray-body :global(.xr-ok) {
+    color: var(--ok);
+  }
+
+  .xray-body :global(.xr-warn) {
+    color: var(--warn);
+  }
+
+  .xray-body :global(.xr-label) {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .xray-body :global(.xr-value) {
+    color: var(--text-2);
+    word-break: break-word;
+  }
+
+  .xray-body :global(.xr-tags) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+  }
+
+  .xray-body :global(.xr-tag) {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: rgb(240 171 252 / 0.14);
+    color: #f5d0fe;
+    font-size: 0.76rem;
+  }
+
+  .xray-body :global(.xr-kw) {
+    background: rgb(250 204 21 / 0.16);
+    color: #fde68a;
+  }
+
+  @media (max-width: 640px) {
+    .demo-toolbar {
+      right: auto;
+      left: max(12px, env(safe-area-inset-left));
+      bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .demo-panel {
+      right: auto;
+      left: 0;
+    }
+
+    .demo-fab span {
+      display: none;
+    }
+
+    .xray-panel {
+      max-height: 45vh;
+      bottom: 72px;
+    }
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const toolbar = document.querySelector<HTMLElement>('[data-demo-toolbar]');
+  const fab = toolbar?.querySelector<HTMLButtonElement>('.demo-fab');
+  const panel = toolbar?.querySelector<HTMLElement>('.demo-panel');
+  const xrayPanel = toolbar?.querySelector<HTMLElement>('[data-xray-panel]');
+  const xrayBody = toolbar?.querySelector<HTMLElement>('[data-xray-body]');
+  const keywords: string[] = JSON.parse(toolbar?.dataset.keywords ?? '[]');
+
+  const store = {
+    get(key: string) {
+      try {
+        return sessionStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set(key: string, value: string | null) {
+      try {
+        if (value === null) sessionStorage.removeItem(key);
+        else sessionStorage.setItem(key, value);
+      } catch {
+        /* privates Fenster o. Ä. – Zustand gilt dann nur für diese Seite */
+      }
+    },
+  };
+
+  function setSwitch(name: string, on: boolean) {
+    toolbar?.querySelector(`[data-toggle="${name}"]`)?.setAttribute('aria-checked', String(on));
+  }
+
+  // --- Panel öffnen/schließen ---------------------------------------------
+  fab?.addEventListener('click', () => {
+    const open = panel?.hidden ?? false;
+    if (panel) panel.hidden = !open;
+    fab.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => {
+    if (panel && !panel.hidden && !toolbar?.contains(e.target as Node)) {
+      panel.hidden = true;
+      fab?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // --- Frostnacht ----------------------------------------------------------
+  function setFrost(on: boolean) {
+    if (on) root.dataset.frost = 'on';
+    else delete root.dataset.frost;
+    store.set('ww-frost', on ? 'on' : null);
+    setSwitch('frost', on);
+    window.dispatchEvent(new CustomEvent('ww:frost', { detail: on }));
+  }
+
+  // --- SEO-Röntgenblick ----------------------------------------------------
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  function row(ok: boolean | null, label: string, value: string) {
+    const icon = ok === null ? '•' : ok ? '✓' : '!';
+    const cls = ok === null ? '' : ok ? 'xr-ok' : 'xr-warn';
+    return `<div class="xr-row"><span class="${cls}">${icon}</span><div><div class="xr-label">${label}</div><div class="xr-value">${value}</div></div></div>`;
+  }
+
+  function highlightKeywords(main: HTMLElement) {
+    const counts = new Map<string, number>();
+    const ranges: Range[] = [];
+    const pattern = new RegExp(`(${keywords.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) =>
+        n.parentElement?.closest('script, style, [aria-hidden="true"]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text;
+      for (const m of node.data.matchAll(pattern)) {
+        const key = keywords.find((k) => k.toLowerCase() === m[0].toLowerCase()) ?? m[0];
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+        const r = new Range();
+        r.setStart(node, m.index!);
+        r.setEnd(node, m.index! + m[0].length);
+        ranges.push(r);
+      }
+    }
+    // CSS Custom Highlight API: markiert Text, ohne das DOM zu verändern
+    const css = CSS as unknown as { highlights?: Map<string, unknown> };
+    const HighlightCtor = (window as unknown as { Highlight?: new (...r: Range[]) => unknown }).Highlight;
+    if (css.highlights && HighlightCtor) css.highlights.set('seo-keywords', new HighlightCtor(...ranges));
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  }
+
+  function analyse() {
+    const main = document.querySelector<HTMLElement>('main');
+    if (!main || !xrayBody) return;
+    const title = document.title;
+    const desc = document.querySelector<HTMLMetaElement>('meta[name="description"]')?.content ?? '';
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href ?? '';
+    const robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content ?? '';
+    const headings = [...main.querySelectorAll<HTMLElement>('h1, h2, h3')];
+    headings.forEach((h) => h.setAttribute('data-xray-tag', h.tagName));
+    const h1 = headings.filter((h) => h.tagName === 'H1');
+    const types = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap((s) => {
+      try {
+        const json = JSON.parse(s.textContent ?? '{}');
+        return (json['@graph'] ?? [json]).map((n: { '@type': string }) => n['@type']);
+      } catch {
+        return [];
+      }
+    });
+    const imgs = [...main.querySelectorAll('img')];
+    const withAlt = imgs.filter((i) => i.alt.trim().length > 0);
+    const internal = [...main.querySelectorAll<HTMLAnchorElement>('a[href]')].filter((a) => a.host === location.host);
+    const kw = highlightKeywords(main);
+
+    xrayBody.innerHTML = [
+      row(title.length >= 30 && title.length <= 65, `Title-Tag (${title.length} Zeichen)`, esc(title)),
+      row(desc.length >= 110 && desc.length <= 165, `Meta-Description (${desc.length} Zeichen)`, esc(desc)),
+      row(h1.length === 1, `Hauptüberschrift H1 (${h1.length}×)`, esc(h1[0]?.textContent?.trim() ?? '–')),
+      row(
+        null,
+        'Gliederung',
+        `${headings.filter((h) => h.tagName === 'H2').length}× H2 · ${headings.filter((h) => h.tagName === 'H3').length}× H3 – im Text pink markiert`,
+      ),
+      row(
+        types.length > 0,
+        `Strukturierte Daten (${types.length} Objekte)`,
+        `<div class="xr-tags">${types.map((t) => `<span class="xr-tag">${esc(String(t))}</span>`).join('')}</div>`,
+      ),
+      row(
+        kw.length > 0,
+        'Lokale Keywords (gelb markiert)',
+        `<div class="xr-tags">${kw
+          .slice(0, 10)
+          .map(([k, n]) => `<span class="xr-tag xr-kw">${esc(k)} ×${n}</span>`)
+          .join('')}</div>`,
+      ),
+      row(withAlt.length === imgs.length, 'Bilder mit Alt-Text', `${withAlt.length} von ${imgs.length} (grün umrandet)`),
+      row(internal.length >= 5, 'Interne Verlinkung', `${internal.length} Links auf andere Seiten/Abschnitte`),
+      row(Boolean(canonical), 'Canonical-URL', esc(canonical)),
+      row(null, 'Indexierung', `${esc(robots)}<br><small>Demo ist bewusst auf „noindex“ – beim Livegang ein Schalter.</small>`),
+    ].join('');
+  }
+
+  function setXray(on: boolean) {
+    root.classList.toggle('seo-xray', on);
+    root.classList.remove('seo-xray-pending');
+    store.set('ww-xray', on ? 'on' : null);
+    setSwitch('xray', on);
+    if (xrayPanel) xrayPanel.hidden = !on;
+    if (on) analyse();
+    else {
+      document.querySelectorAll('[data-xray-tag]').forEach((el) => el.removeAttribute('data-xray-tag'));
+      (CSS as unknown as { highlights?: Map<string, unknown> }).highlights?.delete('seo-keywords');
+    }
+  }
+
+  toolbar?.querySelectorAll<HTMLButtonElement>('[data-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-checked') !== 'true';
+      if (btn.dataset.toggle === 'frost') setFrost(on);
+      else setXray(on);
+    });
+  });
+  xrayPanel?.querySelector('.xray-close')?.addEventListener('click', () => setXray(false));
+
+  // Zustand über Seitenwechsel hinweg beibehalten
+  if (store.get('ww-frost') === 'on') setFrost(true);
+  if (store.get('ww-xray') === 'on') setXray(true);
+</script>

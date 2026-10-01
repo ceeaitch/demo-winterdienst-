@@ -1,0 +1,110 @@
+---
+/**
+ * Basis-Layout für alle Seiten: SEO-Meta, Open Graph, JSON-LD, Header/Footer,
+ * Animationen. Schriften werden lokal ausgeliefert (kein Google-Fonts-Server →
+ * DSGVO-konform).
+ */
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/sora/wght.css';
+import '../styles/global.css';
+
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import DemoToolbar from '../components/DemoToolbar.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { DEMO_MODE, company } from '../data/company';
+import { breadcrumbSchema, graph, organizationSchema, websiteSchema } from '../lib/schema';
+import { absoluteUrl, withBase } from '../lib/site';
+
+interface Props {
+  /** Seitentitel ohne Markenname (wird automatisch ergänzt) */
+  title: string;
+  description: string;
+  /** Pfad ohne Base, z. B. '/einsatzgebiet/' */
+  path: string;
+  image?: string;
+  ogType?: 'website' | 'article';
+  /** zusätzliche Schema.org-Objekte dieser Seite */
+  schema?: Record<string, unknown>[];
+  /** Brotkrumen ohne „Startseite“ */
+  breadcrumbs?: { name: string; path: string }[];
+}
+
+const { title, description, path, image = '/og-image.jpg', ogType = 'website', schema = [], breadcrumbs } = Astro.props;
+
+const fullTitle = path === '/' ? title : `${title} | ${company.shortName}`;
+const canonical = absoluteUrl(path);
+const ogImage = absoluteUrl(image);
+const crumbs = breadcrumbs ? [{ name: 'Startseite', path: '/' }, ...breadcrumbs] : null;
+const jsonLd = graph(websiteSchema(), organizationSchema(), ...(crumbs ? [breadcrumbSchema(crumbs)] : []), ...schema);
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {
+      DEMO_MODE ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+      )
+    }
+    <meta name="theme-color" content="#050a16" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+
+    <!-- Open Graph: Vorschau beim Teilen in WhatsApp, LinkedIn & Co. -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Geo-Tags: zusätzliche lokale Signale -->
+    <meta name="geo.region" content="DE-NW" />
+    <meta name="geo.placename" content={company.address.city} />
+    <meta name="geo.position" content={`${company.geo.lat};${company.geo.lng}`} />
+    <meta name="ICBM" content={`${company.geo.lat}, ${company.geo.lng}`} />
+
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        try {
+          if (sessionStorage.getItem('ww-frost') === 'on') d.dataset.frost = 'on';
+        } catch (e) {}
+        // Sicherheitsnetz: falls Animations-JS nicht lädt, Inhalte trotzdem zeigen
+        setTimeout(function () {
+          if (!d.classList.contains('motion-ready')) d.classList.add('reveal-fallback');
+        }, 2500);
+      })();
+    </script>
+
+    <script type="application/ld+json" set:html={jsonLd} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Zum Inhalt springen</a>
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <Header />
+    <main id="main">
+      {crumbs && <Breadcrumbs items={crumbs} />}
+      <slot />
+    </main>
+    <Footer />
+    {DEMO_MODE && <DemoToolbar />}
+    <script>
+      import '../scripts/motion.ts';
+    </script>
+  </body>
+</html>

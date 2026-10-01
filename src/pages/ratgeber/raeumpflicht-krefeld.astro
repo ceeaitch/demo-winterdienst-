@@ -1,0 +1,579 @@
+---
+import heroImg from '../../assets/images/gehweg-winter.jpg';
+import AnfrageForm from '../../components/AnfrageForm.astro';
+import Faq from '../../components/Faq.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import { company } from '../../data/company';
+import { orteMitSeite } from '../../data/orte';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { articleSchema, faqSchema } from '../../lib/schema';
+import { absoluteUrl, withBase } from '../../lib/site';
+
+const path = '/ratgeber/raeumpflicht-krefeld/';
+const headline = 'Räum- und Streupflicht in Krefeld: Was Unternehmen 2026/27 wissen müssen';
+const title = 'Räumpflicht Krefeld 2026/27: Regeln & Haftung';
+const description =
+  'Räum- und Streupflicht in Krefeld kompakt: Wer räumen muss, ab wann (7 bzw. 8 Uhr), warum Streusalz verboten ist, welche BGH-Urteile gelten – mit Checkliste.';
+
+const toc = [
+  { id: 'wer', label: 'Wer ist räumpflichtig?' },
+  { id: 'wann', label: 'Wann muss geräumt werden?' },
+  { id: 'womit', label: 'Womit darf gestreut werden?' },
+  { id: 'parkplatz', label: 'Parkplätze & Zugänge' },
+  { id: 'haftung', label: 'Haftung bei Glätteunfällen' },
+  { id: 'delegation', label: 'Winterdienst übertragen' },
+  { id: 'urteile', label: 'Wichtige Urteile' },
+  { id: 'umland', label: 'Umliegende Städte' },
+  { id: 'checkliste', label: 'Checkliste' },
+];
+
+const checkliste = [
+  'Flächenplan erstellt: Gehwege, Zugänge, Treppen, Rampen, Parkplatz-Fahrgassen',
+  'Zuständigkeit geklärt – auch für Wochenenden, Feiertage, Urlaub und Krankheit',
+  'Örtliche Straßenreinigungssatzung geprüft (Zeiten, Streumittel)',
+  'Salzfreies Streugut für Gehwege vorrätig (Sand, Splitt, Granulat)',
+  'Schriftlicher Vertrag mit dem Winterdienst inkl. Flächen und Uhrzeiten',
+  'Jeder Einsatz wird dokumentiert (Zeit, Ort, Maßnahme)',
+  'Dienstleister wird stichprobenartig kontrolliert – und das ist belegt',
+  'Versicherungsschutz (Haus- und Grundbesitzer- bzw. Betriebshaftpflicht) geprüft',
+];
+
+const faq = [
+  {
+    q: 'Bis wann muss in Krefeld morgens geräumt sein?',
+    a: 'An Werktagen bis 7 Uhr, an Sonn- und Feiertagen bis 8 Uhr. Das gilt für Schnee und Glätte, die nach 20 Uhr am Vortag entstanden sind. Tagsüber (bis 20 Uhr) muss nach Ende des Schneefalls geräumt werden, bei Bedarf mehrmals.',
+  },
+  {
+    q: 'Ist Streusalz in Krefeld verboten?',
+    a: 'Auf Geh- und Radwegen ja: § 6 Abs. 2 der Krefelder Straßenreinigungssatzung erlaubt dort nur abstumpfende Mittel wie Sand, Splitt oder Granulat.',
+  },
+  {
+    q: 'Wer haftet, wenn trotz Winterdienst jemand stürzt?',
+    a: 'Das hängt vom Einzelfall ab. Grundsätzlich haftet der Dienstleister für eigene Fehler; der Eigentümer bleibt aber zur Kontrolle verpflichtet. Vermieter haften gegenüber ihren Mietern zusätzlich für Fehler des beauftragten Dienstes (BGH VIII ZR 250/23).',
+  },
+  {
+    q: 'Muss ich als Mieter einer Gewerbefläche räumen?',
+    a: 'Nur, wenn der Mietvertrag die Räum- und Streupflicht wirksam auf Sie überträgt. Das ist bei Gewerbemietverträgen häufig der Fall – prüfen Sie die Klausel vor Saisonbeginn.',
+  },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  ogType="article"
+  breadcrumbs={[{ name: 'Ratgeber: Räumpflicht Krefeld', path }]}
+  schema={[
+    articleSchema({
+      headline,
+      description,
+      path,
+      datePublished: '2026-10-01',
+      dateModified: '2026-10-01',
+      image: absoluteUrl('/og-image.jpg'),
+    }),
+    faqSchema(faq),
+  ]}
+>
+  <PageHero eyebrow={`Ratgeber · Stand ${company.legalAsOf}`} title={headline} image={heroImg} imageAlt="Verschneiter Gehweg mit Bäumen in der Stadt">
+    <p class="meta-row">
+      <span><Icon name="clock" size={15} /> ca. 7 Min. Lesezeit</span>
+      <span><Icon name="calendar" size={15} /> Aktualisiert am {company.legalAsOf}</span>
+      <span><Icon name="scale" size={15} /> Keine Rechtsberatung</span>
+    </p>
+  </PageHero>
+
+  <div class="container article-layout">
+    <aside class="toc" aria-label="Inhaltsverzeichnis">
+      <p class="toc-title">Inhalt</p>
+      <ol>
+        {toc.map((t) => <li><a href={`#${t.id}`} data-toc-link={t.id}>{t.label}</a></li>)}
+      </ol>
+      <div class="toc-cta">
+        <p><strong>Keine Zeit für all das?</strong> Wir übernehmen Räumen, Streuen und Nachweis.</p>
+        <a class="btn btn-primary btn-sm" href="#anfrage">Angebot anfordern</a>
+      </div>
+    </aside>
+
+    <article class="prose">
+      <div class="tldr" data-reveal>
+        <p class="tldr-title"><Icon name="sparkles" size={18} /> Das Wichtigste in 30 Sekunden</p>
+        <ul class="check-list">
+          <li>In Krefeld räumen die <strong>Anlieger</strong> den Gehweg – werktags <strong>7–20 Uhr</strong>, sonn- und feiertags <strong>8–20 Uhr</strong>, bei Bedarf mehrmals täglich.</li>
+          <li>Schnee und Glätte, die nach 20 Uhr entstehen, müssen <strong>bis 7 Uhr</strong> (sonn- und feiertags 8 Uhr) beseitigt sein.</li>
+          <li><strong>Streusalz ist auf Geh- und Radwegen verboten</strong> (§ 6 Abs. 2 Satzung) – erlaubt sind Sand, Splitt, Granulat.</li>
+          <li>Bei Unfällen haften Sie nach <strong>§ 823 BGB</strong>. Seit 2025 haben es Geschädigte leichter (BGH VI ZR 357/24).</li>
+          <li>Delegieren ist erlaubt, die <strong>Kontrollpflicht bleibt</strong>. Dokumentation ist Ihr bester Schutz.</li>
+        </ul>
+      </div>
+
+      <h2 id="wer">Wer ist in Krefeld räum- und streupflichtig?</h2>
+      <p>
+        <strong>Kurz gesagt: die Anlieger, also in der Regel die Grundstückseigentümer.</strong> Das Straßenreinigungsgesetz
+        NRW erlaubt den Kommunen, den Winterdienst auf Gehwegen per Satzung auf die Anlieger zu übertragen. Krefeld macht
+        davon in seiner Straßenreinigungssatzung Gebrauch. Für einzelne Straßen kann die Satzung den Anliegern zusätzlich den
+        Winterdienst auf der Fahrbahn auferlegen – welche das sind, ergibt sich aus dem Straßenverzeichnis zur Satzung.
+      </p>
+      <p>
+        Unabhängig von der Satzung gilt auf dem eigenen Grundstück die allgemeine <strong>Verkehrssicherungspflicht</strong>:
+        Wer Zugänge, Parkplätze oder Betriebsflächen für Kunden, Mitarbeitende oder Lieferanten öffnet, muss sie bei Glätte
+        sichern. Eigentümer können diese Pflichten per Mietvertrag auf Mieter oder per Vertrag auf einen Winterdienst
+        übertragen.
+      </p>
+
+      <h2 id="wann">Wann muss geräumt und gestreut werden?</h2>
+      <p><strong>Kurz gesagt: tagsüber sofort nach dem Schneefall, morgens spätestens um 7 Uhr.</strong></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Situation</th><th scope="col">Pflicht in Krefeld</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Werktags</th><td>zwischen 7 und 20 Uhr räumen und streuen</td></tr>
+            <tr><th scope="row">Sonn- und feiertags</th><td>zwischen 8 und 20 Uhr räumen und streuen</td></tr>
+            <tr><th scope="row">Schneefall tagsüber</th><td>unverzüglich nach Ende des Schneefalls, bei Bedarf mehrmals täglich</td></tr>
+            <tr><th scope="row">Schnee/Glätte nach 20 Uhr</th><td>bis 7 Uhr (sonn- und feiertags 8 Uhr) am Folgetag beseitigen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted">Quelle: Satzung über die Reinigung öffentlicher Straßen in der Stadt Krefeld; Informationen des Kommunalbetriebs Krefeld.</p>
+
+      <h2 id="womit">Womit darf gestreut werden?</h2>
+      <p>
+        <strong>Kurz gesagt: auf Gehwegen nur mit abstumpfenden Mitteln – kein Salz.</strong> § 6 Abs. 2 der Krefelder
+        Straßenreinigungssatzung verbietet Streusalz auf Geh- und Radwegen. Zulässig sind Sand, Splitt oder Granulat. Der
+        Grund: Salz schädigt Bäume, Pflanzen, Böden und Bauwerke. Wer „schnell mal Salz“ streut, verstößt gegen die Satzung.
+      </p>
+
+      <h2 id="parkplatz">Gilt die Pflicht auch für Firmenparkplätze und Zugänge?</h2>
+      <p>
+        <strong>Kurz gesagt: ja, aber mit Augenmaß.</strong> Der Bundesgerichtshof hat entschieden, dass auf Parkplätzen die
+        Fahr- und Gehwege gesichert werden müssen, nicht aber jede einzelne Stellfläche (BGH, Urteil vom 02.07.2019, VI ZR
+        184/18). Wer aus dem Auto steigt, kann sich festhalten und muss selbst vorsichtig sein. Eingänge, Treppen und Rampen
+        – gerade bei Praxen, Pflegeeinrichtungen oder im Handel – verlangen dagegen besondere Sorgfalt.
+      </p>
+
+      <h2 id="haftung">Haftung: Was droht bei einem Glätteunfall?</h2>
+      <p>
+        <strong>Kurz gesagt: Schadensersatz und Schmerzensgeld – und das Risiko ist gestiegen.</strong> Wer seine
+        Verkehrssicherungspflicht verletzt, haftet nach § 823 BGB für die Folgen eines Sturzes: Behandlungskosten,
+        Verdienstausfall, Schmerzensgeld, unter Umständen auch Regressforderungen von Sozialversicherungsträgern.
+      </p>
+      <p>
+        Mit Urteil vom 01.07.2025 (VI ZR 357/24) hat der BGH klargestellt, dass die Anforderungen an den Nachweis einer
+        „allgemeinen Glätte“ nicht überspannt werden dürfen. Für Gestürzte wird es damit leichter, Ansprüche durchzusetzen –
+        für Eigentümer steigt das Risiko.
+      </p>
+
+      <h2 id="delegation">Winterdienst übertragen: Was bleibt bei Ihnen?</h2>
+      <p>
+        <strong>Kurz gesagt: die Kontrolle.</strong> Sie dürfen den Winterdienst an einen Dienstleister übertragen. Damit
+        verwandelt sich Ihre Pflicht aber in eine <strong>Auswahl- und Überwachungspflicht</strong>: Sie müssen einen
+        zuverlässigen Dienstleister wählen und regelmäßig prüfen, ob er seine Arbeit macht.
+      </p>
+      <p>
+        Für Vermieter hat der BGH die Haftung verschärft: Gegenüber ihren Mietern haften sie für Fehler des beauftragten
+        Winterdienstes wie für eigenes Verschulden (§ 278 BGB; BGH, Urteil vom 06.08.2025, VIII ZR 250/23).
+      </p>
+      <div class="callout">
+        <Icon name="file-check" size={22} />
+        <p>
+          <strong>Praxis-Tipp:</strong> Ein schriftlicher Vertrag mit Flächenplan und Uhrzeiten plus ein Protokoll zu jedem
+          Einsatz (Zeit, Ort, Maßnahme, Foto) ist im Streitfall der beste Beleg dafür, dass Sie Ihre Pflichten ernst genommen
+          haben.
+        </p>
+      </div>
+
+      <h2 id="urteile">Die wichtigsten Urteile im Überblick</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th scope="col">Datum · Aktenzeichen</th><th scope="col">Kernaussage</th><th scope="col">Bedeutung für Sie</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">02.07.2019<br />BGH VI ZR 184/18</th>
+              <td>Parkplätze: Fahr- und Gehwege streuen, nicht jede Stellfläche.</td>
+              <td>Klare Prioritäten für Handel und Gewerbe.</td>
+            </tr>
+            <tr>
+              <th scope="row">01.07.2025<br />BGH VI ZR 357/24</th>
+              <td>Anforderungen an den Nachweis „allgemeiner Glätte“ dürfen nicht überspannt werden.</td>
+              <td>Geschädigte setzen Ansprüche leichter durch.</td>
+            </tr>
+            <tr>
+              <th scope="row">06.08.2025<br />BGH VIII ZR 250/23</th>
+              <td>Vermieter haften gegenüber Mietern für Fehler des Winterdienstes (§ 278 BGB).</td>
+              <td>Dienstleister sorgfältig wählen und kontrollieren.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="umland">Und in den umliegenden Städten?</h2>
+      <p>
+        <strong>Kurz gesagt: Jede Kommune hat eigene Regeln.</strong> Meerbusch, Willich, Tönisvorst, Kempen, Moers und die
+        übrigen Städte im Umkreis regeln den Winterdienst in eigenen Satzungen. Räumzeiten und erlaubte Streumittel können
+        von Krefeld abweichen. Lokale Hinweise finden Sie auf unseren Ortsseiten:
+      </p>
+      <ul>
+        {orteMitSeite.map((o) => <li><a href={withBase(`/einsatzgebiet/${o.slug}/`)}>Winterdienst {o.name}</a></li>)}
+        <li><a href={withBase('/einsatzgebiet/')}>Alle Orte im Einsatzgebiet</a></li>
+      </ul>
+
+      <h2 id="checkliste">Checkliste: Ist Ihr Betrieb winterfest?</h2>
+      <p>Haken Sie ab, was bereits erledigt ist:</p>
+      <div class="checkliste card" data-checkliste>
+        <div class="cl-progress">
+          <span class="cl-count"><span data-cl-done>0</span> von {checkliste.length} erledigt</span>
+          <span class="cl-bar"><span data-cl-bar></span></span>
+        </div>
+        <ul>
+          {
+            checkliste.map((item, i) => (
+              <li>
+                <label>
+                  <input type="checkbox" data-cl-item={i} />
+                  <span class="cl-box" aria-hidden="true" />
+                  <span>{item}</span>
+                </label>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="cl-msg" data-cl-msg>Jeder offene Punkt ist ein Haftungsrisiko. Wir übernehmen die Punkte 1 bis 7 für Sie.</p>
+      </div>
+
+      <h2 id="quellen" class="quellen-title">Quellen</h2>
+      <ul class="quellen">
+        <li><a href="https://service.krefeld.de/system/files/2024-05/6.35-Satzung_ueber_die_Strassenreinigung_in_der_Stadt_Krefeld.pdf" rel="noopener" target="_blank">Stadt Krefeld: Satzung über die Reinigung öffentlicher Straßen (PDF)</a></li>
+        <li><a href="https://www.kbk-krefeld.de/11-2023/kbk-bietet-informationen-zum-winterdienst-an" rel="noopener" target="_blank">Kommunalbetrieb Krefeld: Informationen zum Winterdienst</a></li>
+        <li><a href="https://www.lto.de/recht/nachrichten/n/bgh-vizr184-18-schadensersatz-streupflicht-supermarkt-parkplatz-verkehrssicherungspflicht" rel="noopener" target="_blank">LTO: BGH zur Streupflicht auf Parkplätzen (VI ZR 184/18)</a></li>
+        <li><a href="https://www.presse-control.de/2025/10/07/schneerumpflicht-bgh-erleichtert-schadensersatz-nach-gltteunfllen/" rel="noopener" target="_blank">Bericht zu BGH VI ZR 357/24 (allgemeine Glätte)</a></li>
+        <li><a href="https://www.anwalt.de/rechtstipps/winterdienst-wohnungseigentuemer-haftet-wenn-mieter-faellt-bgh-urteil-vom-06-08-2025-viii-zr-250-23-258292.html" rel="noopener" target="_blank">Bericht zu BGH VIII ZR 250/23 (Haftung des Vermieters)</a></li>
+        <li><a href="https://www.haufe.de/recht/weitere-rechtsgebiete/verkehrsrecht/welche-streu-und-raeumpflichten-bestehen-fuer-parkplaetze_212_482290.html" rel="noopener" target="_blank">Haufe: Streu- und Räumpflichten für Parkplätze</a></li>
+      </ul>
+      <p class="legal-note">
+        Dieser Ratgeber ist eine allgemeine Information und ersetzt keine Rechtsberatung im Einzelfall. Stand: {company.legalAsOf}.
+      </p>
+    </article>
+  </div>
+
+  <Faq items={faq} title="Häufige Fragen zur Räumpflicht in Krefeld" />
+  <AnfrageForm title="Pflichten abgeben – Winterdienst mit Nachweis anfragen" />
+</BaseLayout>
+
+<style>
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.4rem;
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-2);
+  }
+
+  .meta-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .meta-row :global(svg) {
+    color: var(--ice);
+  }
+
+  .article-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: clamp(32px, 5vw, 72px);
+    padding-block: clamp(40px, 6vw, 80px) var(--section-y);
+  }
+
+  /* --- Inhaltsverzeichnis --- */
+  .toc {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    align-self: start;
+  }
+
+  .toc-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ice);
+  }
+
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    border-left: 1px solid var(--border);
+  }
+
+  .toc ol a {
+    display: block;
+    padding: 0.4rem 0 0.4rem 1rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition:
+      color 0.25s,
+      border-color 0.25s;
+  }
+
+  .toc ol a:hover,
+  .toc ol a.is-active {
+    color: var(--text);
+    border-left-color: var(--ice);
+  }
+
+  .toc-cta {
+    padding: 1.2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-size: 0.9rem;
+  }
+
+  /* --- Artikel --- */
+  .prose {
+    max-width: 760px;
+    font-size: 1.06rem;
+  }
+
+  .prose h2 {
+    font-size: clamp(1.5rem, 1.25rem + 1.1vw, 2.1rem);
+    margin-top: 3.2rem;
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
+
+  .prose p,
+  .prose li {
+    color: var(--text-2);
+  }
+
+  .prose ul:not(.check-list) li {
+    margin-bottom: 0.4rem;
+  }
+
+  .tldr {
+    padding: clamp(22px, 3vw, 32px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(125 211 252 / 0.4);
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgb(56 189 248 / 0.16), transparent 60%),
+      var(--surface);
+    box-shadow: var(--glow);
+  }
+
+  .tldr-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 650;
+    font-size: 1.15rem;
+    color: var(--text) !important;
+  }
+
+  .tldr-title :global(svg) {
+    color: var(--ice);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.4rem 0 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .table-wrap table {
+    min-width: 520px;
+  }
+
+  .table-wrap td {
+    color: var(--text-2);
+  }
+
+  .table-wrap tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .callout {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    margin: 1.6rem 0;
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius);
+    border-left: 3px solid var(--ok);
+    background: rgb(52 211 153 / 0.08);
+  }
+
+  .callout :global(svg) {
+    color: var(--ok);
+  }
+
+  .callout p {
+    margin: 0;
+  }
+
+  /* --- Checkliste --- */
+  .checkliste ul {
+    list-style: none;
+    padding: 0;
+    margin: 1.2rem 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .checkliste label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    align-items: start;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--text-2);
+  }
+
+  .checkliste label:hover {
+    background: var(--surface-2);
+  }
+
+  .checkliste input {
+    position: absolute;
+    opacity: 0;
+  }
+
+  .cl-box {
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border-strong);
+    transition:
+      background 0.25s,
+      border-color 0.25s;
+  }
+
+  .checkliste input:checked + .cl-box {
+    border-color: transparent;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2303111f' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.2 4.2L19 7'/%3E%3C/svg%3E")
+        center / 70% no-repeat,
+      var(--grad-ice);
+  }
+
+  .checkliste input:checked ~ span:last-child {
+    color: var(--text);
+  }
+
+  .checkliste input:focus-visible + .cl-box {
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+  }
+
+  .cl-progress {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .cl-count {
+    font-weight: 650;
+    color: var(--text);
+  }
+
+  .cl-bar {
+    height: 6px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+
+  .cl-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--grad-ice);
+    transition: width 0.5s var(--ease-out);
+  }
+
+  .cl-msg {
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .cl-msg.is-complete {
+    color: var(--ok) !important;
+  }
+
+  .quellen-title {
+    font-size: 1.3rem !important;
+  }
+
+  .quellen {
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 960px) {
+    .article-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .toc {
+      position: static;
+    }
+
+    .toc-cta {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Inhaltsverzeichnis: aktiven Abschnitt hervorheben
+  const links = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-toc-link]').forEach((a) => links.set(a.dataset.tocLink!, a));
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          links.forEach((a) => a.classList.remove('is-active'));
+          links.get(e.target.id)?.classList.add('is-active');
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -70% 0px' },
+  );
+  links.forEach((_, id) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  // Checkliste mit Fortschritt
+  const box = document.querySelector<HTMLElement>('[data-checkliste]');
+  if (box) {
+    const items = [...box.querySelectorAll<HTMLInputElement>('[data-cl-item]')];
+    const update = () => {
+      const done = items.filter((i) => i.checked).length;
+      box.querySelector('[data-cl-done]')!.textContent = String(done);
+      box.querySelector<HTMLElement>('[data-cl-bar]')!.style.width = `${(done / items.length) * 100}%`;
+      const msg = box.querySelector<HTMLElement>('[data-cl-msg]')!;
+      msg.classList.toggle('is-complete', done === items.length);
+      msg.textContent =
+        done === items.length
+          ? 'Sehr gut – Ihr Betrieb ist winterfest aufgestellt.'
+          : `${items.length - done} offene Punkte = ${items.length - done} Haftungsrisiken. Wir übernehmen die Punkte 1 bis 7 für Sie.`;
+    };
+    items.forEach((i) => i.addEventListener('change', update));
+  }
+</script>
