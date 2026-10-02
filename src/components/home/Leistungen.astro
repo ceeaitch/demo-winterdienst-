@@ -1,0 +1,381 @@
+---
+import Icon from '../Icon.astro';
+
+const vorteile = [
+  {
+    icon: 'shield',
+    title: 'Wir übernehmen Ihre Räum- & Streupflicht',
+    text: 'Per Vertrag übertragen Sie die Pflicht für die vereinbarten Flächen an uns – inklusive Betriebshaftpflicht für unsere Einsätze.',
+  },
+  {
+    icon: 'file-check',
+    title: 'Digitales Räumprotokoll',
+    text: 'Jeder Einsatz mit Zeitstempel, GPS, Foto und Temperatur. Ihr Nachweis für Auswahl und Kontrolle im Streitfall.',
+  },
+  {
+    icon: 'cloud-snow',
+    title: '24/7-Wetterüberwachung',
+    text: 'Wir reagieren auf Schnee, Glatteis, Reif und überfrierende Nässe – nicht erst, wenn jemand anruft.',
+  },
+  {
+    icon: 'ban',
+    title: 'Satzungskonforme Streumittel',
+    text: 'Auf Gehwegen salzfrei mit Granulat oder Splitt, wie es die Krefelder Satzung vorschreibt. Auf Betriebsflächen nach Absprache.',
+  },
+  {
+    icon: 'euro',
+    title: 'Planbare Saisonpauschale',
+    text: 'Ein fester Preis von November bis März – egal wie oft es schneit. Alternativ Abrechnung pro Einsatz.',
+  },
+  {
+    icon: 'route',
+    title: 'Lokale Touren, kurze Wege',
+    text: 'Betriebshof in Krefeld, Einsatzgebiet 20 km. Kurze Anfahrt bedeutet schnelle Reaktion – auch bei Nachschneien.',
+  },
+] as const;
+
+const protokoll = [
+  { label: 'Gehweg geräumt', detail: '42 m · Handräumung' },
+  { label: 'Abgestreut', detail: 'Granulat · salzfrei' },
+  { label: 'Zufahrt & Fahrgassen', detail: 'maschinell' },
+  { label: 'Eingang & Rampe', detail: 'per Hand, abgestreut' },
+  { label: 'Fotos dokumentiert', detail: '4 Fotos · GPS' },
+];
+---
+
+<section class="section leistungen" id="leistungen">
+  <div class="glow-bg" style="--glow-x: 25%; --glow-y: 50%"></div>
+  <div class="container lst-layout">
+    <div class="lst-mockup" data-reveal>
+      <div class="protokoll" data-protokoll>
+        <div class="pr-head">
+          <div>
+            <p class="pr-kicker">Räumprotokoll</p>
+            <p class="pr-title">Einsatz #2026-0118</p>
+          </div>
+          <span class="pr-status">Abgeschlossen</span>
+        </div>
+        <dl class="pr-meta">
+          <div><dt>Objekt</dt><dd>Musterstraße 12, Krefeld</dd></div>
+          <div><dt>Beginn</dt><dd>04:52 Uhr</dd></div>
+          <div><dt>Ende</dt><dd>05:31 Uhr</dd></div>
+          <div><dt>Temperatur</dt><dd>−2,4 °C</dd></div>
+        </dl>
+        <ul class="pr-list">
+          {
+            protokoll.map((p, i) => (
+              <li style={`--i: ${i}`}>
+                <span class="pr-check">
+                  <Icon name="check" size={14} strokeWidth={3} />
+                </span>
+                <span class="pr-label">{p.label}</span>
+                <span class="pr-detail">{p.detail}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="pr-photos" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <p class="pr-gps"><Icon name="map-pin" size={14} /> 51.3331° N, 6.5623° O · signiert 05:31:48</p>
+        <div class="pr-stamp" aria-hidden="true">Nachweis<br />gesichert</div>
+      </div>
+      <p class="lst-caption muted small">Beispielansicht – so erhalten Sie jeden Einsatz per E-Mail und im Kundenportal.</p>
+    </div>
+
+    <div>
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Leistungen & Vorteile</p>
+        <h2>Nicht nur Schnee schieben: <span class="text-gradient">Sicherheit mit Beleg.</span></h2>
+        <p class="lead">
+          Räumen kann jeder. Entscheidend ist, dass Sie im Ernstfall nachweisen können, dass rechtzeitig und richtig
+          geräumt wurde.
+        </p>
+      </header>
+
+      <ul class="lst-grid" data-reveal-stagger>
+        {
+          vorteile.map((v) => (
+            <li class="lst-item">
+              <span class="icon-badge">
+                <Icon name={v.icon} size={22} />
+              </span>
+              <div>
+                <h3>{v.title}</h3>
+                <p class="muted">{v.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .lst-layout {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+  }
+
+  .lst-mockup {
+    position: sticky;
+    top: calc(var(--header-h) + 40px);
+  }
+
+  .lst-caption {
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  /* --- Protokoll-Mockup --- */
+  .protokoll {
+    position: relative;
+    padding: 1.6rem;
+    border-radius: 26px;
+    background: linear-gradient(180deg, #f8fbff, #eaf2fb);
+    color: #0b1324;
+    box-shadow:
+      0 40px 80px -30px rgb(0 0 0 / 0.8),
+      0 0 0 1px rgb(255 255 255 / 0.1),
+      0 0 80px -20px rgb(56 189 248 / 0.35);
+    transform: rotate(-1.5deg);
+    overflow: hidden;
+  }
+
+  .pr-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .pr-kicker {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0369a1;
+  }
+
+  .pr-title {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .pr-status {
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: #d1fae5;
+    color: #047857;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .pr-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 1rem;
+    margin: 0 0 1.2rem;
+    padding: 0.9rem;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #dbe5f2;
+  }
+
+  .pr-meta dt {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .pr-meta dd {
+    margin: 0;
+    font-weight: 650;
+    font-size: 0.92rem;
+  }
+
+  .pr-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .pr-list li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    font-size: 0.88rem;
+  }
+
+  .pr-check {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #fff;
+  }
+
+  .pr-label {
+    font-weight: 600;
+  }
+
+  .pr-detail {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+
+  .pr-photos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.45rem;
+    margin: 1rem 0 0.8rem;
+  }
+
+  .pr-photos span {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    background:
+      linear-gradient(160deg, rgb(255 255 255 / 0.6), transparent 50%),
+      linear-gradient(200deg, #94a3b8, #cbd5e1 60%, #e2e8f0);
+  }
+
+  .pr-photos span:nth-child(2) {
+    background:
+      linear-gradient(160deg, rgb(255 255 255 / 0.6), transparent 50%),
+      linear-gradient(20deg, #64748b, #cbd5e1);
+  }
+
+  .pr-photos span:nth-child(3) {
+    background:
+      linear-gradient(160deg, rgb(255 255 255 / 0.5), transparent 50%),
+      linear-gradient(120deg, #e2e8f0, #94a3b8);
+  }
+
+  .pr-gps {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    font-size: 0.75rem;
+    color: #475569;
+  }
+
+  .pr-stamp {
+    position: absolute;
+    right: 18px;
+    bottom: 54px;
+    padding: 0.5rem 0.9rem;
+    border: 3px solid #059669;
+    border-radius: 10px;
+    color: #059669;
+    font: 800 0.85rem/1.1 var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    transform: rotate(-12deg);
+    opacity: 0.85;
+    background: rgb(255 255 255 / 0.6);
+  }
+
+  /* Animation: Zeilen haken sich nacheinander ab, dann kommt der Stempel */
+  :global(.js) .protokoll:not(.is-done) .pr-list li {
+    opacity: 0.35;
+  }
+
+  :global(.js) .protokoll:not(.is-done) .pr-check {
+    transform: scale(0);
+  }
+
+  :global(.js) .protokoll:not(.is-done) .pr-stamp {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2);
+  }
+
+  .protokoll.is-done .pr-list li {
+    transition: opacity 0.4s calc(var(--i) * 0.35s + 0.2s);
+  }
+
+  .protokoll.is-done .pr-check {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 0.35s + 0.2s);
+  }
+
+  .protokoll.is-done .pr-stamp {
+    transition:
+      opacity 0.3s 2.2s,
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2.2s;
+  }
+
+  /* --- Vorteile --- */
+  .lst-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 3vw, 40px) clamp(20px, 3vw, 36px);
+  }
+
+  .lst-item h3 {
+    font-size: 1.12rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .lst-item p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 960px) {
+    .lst-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .lst-mockup {
+      position: static;
+      max-width: 460px;
+      margin-inline: auto;
+      order: 2;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .lst-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const protokoll = document.querySelector<HTMLElement>('[data-protokoll]');
+  if (protokoll) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) protokoll.classList.add('is-done');
+    else
+      new IntersectionObserver(
+        ([entry], obs) => {
+          if (entry.isIntersecting) {
+            protokoll.classList.add('is-done');
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.45 },
+      ).observe(protokoll);
+  }
+</script>

@@ -1,0 +1,530 @@
+---
+import { preise } from '../../data/preise';
+import Icon from '../Icon.astro';
+
+// Infinity lässt sich nicht als JSON übertragen → null
+const config = JSON.stringify({ ...preise, staffel: preise.staffel.map((s) => ({ ...s, bisM2: Number.isFinite(s.bisM2) ? s.bisM2 : null })) });
+---
+
+<section class="section rechner" id="rechner">
+  <div class="glow-bg" style="--glow-x: 80%; --glow-y: 30%"></div>
+  <div class="container">
+    <header class="section-head center" data-reveal>
+      <p class="eyebrow">Kostenrechner</p>
+      <h2>Was kostet Ihr Winterdienst? In 30 Sekunden zum Richtpreis.</h2>
+      <p class="lead">Fläche einstellen, Leistungen wählen – fertig. Das verbindliche Angebot erhalten Sie nach einer kostenlosen Objektbegehung.</p>
+    </header>
+
+    <form class="kr" data-rechner data-config={config} onsubmit="return false" aria-label="Kostenrechner Winterdienst" data-reveal>
+      <div class="kr-inputs card">
+        <div class="kr-field">
+          <div class="kr-label-row">
+            <label for="kr-flaeche">Zu betreuende Fläche</label>
+            <output for="kr-flaeche kr-flaeche-num" class="kr-area" data-area-out>500 m²</output>
+          </div>
+          <input type="range" id="kr-flaeche" name="flaeche" min="50" max="6000" step="10" value="500" data-area-range />
+          <div class="kr-range-scale" aria-hidden="true"><span>50 m²</span><span>6.000 m²</span></div>
+          <div class="kr-num">
+            <label for="kr-flaeche-num" class="sr-only">Fläche in Quadratmetern</label>
+            <input type="number" id="kr-flaeche-num" class="input" min="50" max="50000" step="10" value="500" inputmode="numeric" data-area-num />
+            <span>m² exakt eingeben</span>
+          </div>
+          <p class="kr-hint">
+            Faustregel: Gehweg = Länge × Breite. 30 m Grundstücksfront × 1,5 m ≈ 45 m².
+          </p>
+        </div>
+
+        <fieldset class="kr-field">
+          <legend>Art der Fläche</legend>
+          <div class="kr-seg">
+            {
+              preise.flaechenarten.map((f, i) => (
+                <label class="kr-seg-item">
+                  <input type="radio" name="art" value={f.id} checked={i === 0} />
+                  <span>
+                    <strong>{f.label}</strong>
+                    <small>{f.hint}</small>
+                  </span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="kr-field">
+          <legend>Zusatzleistungen</legend>
+          <div class="kr-options">
+            {
+              preise.optionen.map((o) => (
+                <label class="kr-option">
+                  <input type="checkbox" name="option" value={o.id} />
+                  <span class="kr-toggle" aria-hidden="true" />
+                  <span class="kr-option-label">{o.label}</span>
+                  <span class="kr-option-price">{o.typ === 'prozent' ? `+${Math.round(o.wert * 100)} %` : `+${o.wert} €`}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+      </div>
+
+      <aside class="kr-result" aria-live="polite">
+        <p class="kr-result-kicker">Ihr Richtpreis · Saisonpauschale</p>
+        <p class="kr-price"><span data-price>–</span> <small>€ netto</small></p>
+        <p class="kr-range-text" data-range>–</p>
+        <dl class="kr-breakdown">
+          <div><dt>pro Monat (Nov–März)</dt><dd data-month>–</dd></div>
+          <div><dt>alternativ je Einsatz</dt><dd data-einsatz>–</dd></div>
+        </dl>
+        <p class="kr-incl-title">Immer inklusive</p>
+        <ul class="check-list kr-incl">
+          {preise.inklusive.map((i) => <li>{i}</li>)}
+        </ul>
+        <button type="button" class="btn btn-primary btn-lg kr-cta" data-rechner-cta>
+          Angebot zu diesem Richtpreis <Icon name="arrow-right" size={18} class="arrow" />
+        </button>
+        <p class="kr-disclaimer">Unverbindliche Richtwerte (Demo-Preise), zzgl. MwSt. Endpreis nach Objektbegehung.</p>
+      </aside>
+    </form>
+  </div>
+</section>
+
+<style>
+  .kr {
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: clamp(20px, 3vw, 32px);
+    align-items: start;
+  }
+
+  .kr-inputs {
+    display: grid;
+    gap: 2rem;
+    padding: clamp(24px, 3.5vw, 40px);
+  }
+
+  .kr-field {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .kr-field legend,
+  .kr-field > .kr-label-row label {
+    font-family: var(--font-display);
+    font-weight: 650;
+    font-size: 1.1rem;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+
+  .kr-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .kr-area {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ice);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Eigener Slider */
+  input[type='range'] {
+    --fill: 8%;
+    width: 100%;
+    height: 34px;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--ice-2) var(--fill), var(--surface-2) var(--fill));
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 8px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--ice-2) var(--fill), var(--surface-2) var(--fill));
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    margin-top: -10px;
+    border-radius: 50%;
+    background: var(--frost);
+    border: 4px solid var(--ice-2);
+    box-shadow: 0 0 0 6px rgb(56 189 248 / 0.18);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--frost);
+    border: 4px solid var(--ice-2);
+    box-shadow: 0 0 0 6px rgb(56 189 248 / 0.18);
+  }
+
+  .kr-range-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .kr-num {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .kr-num .input {
+    width: 140px;
+    min-height: 44px;
+    padding: 0.5rem 0.8rem;
+    background: rgb(5 10 22 / 0.6);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .kr-hint {
+    margin: 0.8rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .kr-seg {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+
+  .kr-seg-item input,
+  .kr-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .kr-seg-item span {
+    display: grid;
+    gap: 0.2rem;
+    height: 100%;
+    padding: 0.9rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: rgb(5 10 22 / 0.45);
+    cursor: pointer;
+    transition:
+      border-color 0.25s,
+      background 0.25s;
+  }
+
+  .kr-seg-item small {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  .kr-seg-item input:checked + span {
+    border-color: var(--ice);
+    background: rgb(125 211 252 / 0.12);
+    box-shadow: inset 0 0 0 1px var(--ice);
+  }
+
+  .kr-seg-item input:focus-visible + span,
+  .kr-option input:focus-visible ~ .kr-toggle {
+    outline: 2px solid var(--ice);
+    outline-offset: 3px;
+  }
+
+  .kr-options {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .kr-option {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgb(5 10 22 / 0.35);
+    cursor: pointer;
+  }
+
+  .kr-toggle {
+    width: 40px;
+    height: 23px;
+    border-radius: 99px;
+    background: rgb(148 163 184 / 0.3);
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .kr-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .kr-option input:checked ~ .kr-toggle {
+    background: var(--ice-2);
+  }
+
+  .kr-option input:checked ~ .kr-toggle::after {
+    transform: translateX(17px);
+  }
+
+  .kr-option-price {
+    font-size: 0.85rem;
+    color: var(--ice);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* --- Ergebnis --- */
+  .kr-result {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    padding: clamp(24px, 3vw, 36px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(125 211 252 / 0.35);
+    background:
+      radial-gradient(120% 80% at 100% 0%, rgb(56 189 248 / 0.2), transparent 60%),
+      linear-gradient(180deg, #0d1a30, #08111f);
+    box-shadow: var(--glow);
+  }
+
+  .kr-result-kicker {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ice);
+  }
+
+  .kr-price {
+    margin: 0.6rem 0 0.2rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 2rem + 2vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kr-price small {
+    font-size: 1rem;
+    letter-spacing: 0;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  .kr-range-text {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .kr-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin: 1.2rem 0;
+    padding: 1rem 0;
+    border-block: 1px solid var(--border);
+  }
+
+  .kr-breakdown dt {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .kr-breakdown dd {
+    margin: 0.2rem 0 0;
+    font-weight: 650;
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kr-incl-title {
+    font-weight: 650;
+    margin-bottom: 0.7rem;
+  }
+
+  .kr-incl {
+    font-size: 0.88rem;
+    color: var(--text-2);
+  }
+
+  .kr-cta {
+    width: 100%;
+    margin-top: 1.6rem;
+    white-space: normal;
+  }
+
+  .kr-disclaimer {
+    margin: 0.9rem 0 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 960px) {
+    .kr {
+      grid-template-columns: 1fr;
+    }
+
+    .kr-result {
+      position: static;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .kr-seg {
+      grid-template-columns: 1fr;
+    }
+
+    .kr-num span {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { prefillAnfrage } from '../../scripts/prefill';
+
+  type Config = {
+    mindestpreisSaison: number;
+    staffel: { bisM2: number | null; eurProM2: number }[];
+    flaechenarten: { id: string; label: string; faktor: number }[];
+    optionen: { id: string; label: string; typ: 'prozent' | 'fix'; wert: number }[];
+    proEinsatz: { eurProM2: number; anfahrt: number };
+    saisonMonate: number;
+  };
+
+  const form = document.querySelector<HTMLFormElement>('[data-rechner]');
+
+  if (form) {
+    const cfg: Config = JSON.parse(form.dataset.config!);
+    const range = form.querySelector<HTMLInputElement>('[data-area-range]')!;
+    const num = form.querySelector<HTMLInputElement>('[data-area-num]')!;
+    const out = form.querySelector<HTMLOutputElement>('[data-area-out]')!;
+    const priceEl = form.querySelector<HTMLElement>('[data-price]')!;
+    const eur = (n: number) => n.toLocaleString('de-DE', { maximumFractionDigits: 0 });
+    let shown = 0;
+    let anim = 0;
+    let last = { area: 0, total: 0, art: '', optionen: [] as string[] };
+
+    // Staffelpreis: jede Stufe gilt nur für die m² innerhalb dieser Stufe
+    function basis(area: number) {
+      let rest = area;
+      let prev = 0;
+      let sum = 0;
+      for (const s of cfg.staffel) {
+        const cap = s.bisM2 ?? Infinity;
+        const inStufe = Math.max(0, Math.min(rest, cap - prev));
+        sum += inStufe * s.eurProM2;
+        rest -= inStufe;
+        prev = cap;
+        if (rest <= 0) break;
+      }
+      return sum;
+    }
+
+    function animateTo(target: number) {
+      cancelAnimationFrame(anim);
+      const from = shown;
+      const t0 = performance.now();
+      const step = (t: number) => {
+        const p = Math.min(1, (t - t0) / 600);
+        shown = from + (target - from) * (1 - (1 - p) ** 3);
+        priceEl.textContent = eur(Math.round(shown / 10) * 10);
+        if (p < 1) anim = requestAnimationFrame(step);
+      };
+      anim = requestAnimationFrame(step);
+    }
+
+    function calc() {
+      const area = Math.max(50, Number(num.value) || 50);
+      const artId = (form!.querySelector<HTMLInputElement>('input[name="art"]:checked')?.value ?? 'gehweg');
+      const art = cfg.flaechenarten.find((f) => f.id === artId)!;
+      const gewaehlt = [...form!.querySelectorAll<HTMLInputElement>('input[name="option"]:checked')].map((i) => i.value);
+
+      let total = basis(area) * art.faktor;
+      let fix = 0;
+      for (const o of cfg.optionen.filter((o) => gewaehlt.includes(o.id))) {
+        if (o.typ === 'prozent') total *= 1 + o.wert;
+        else fix += o.wert;
+      }
+      total = Math.max(cfg.mindestpreisSaison, total) + fix;
+      const einsatz = area * cfg.proEinsatz.eurProM2 * art.faktor + cfg.proEinsatz.anfahrt;
+
+      out.textContent = `${eur(area)} m²`;
+      animateTo(total);
+      form!.querySelector('[data-range]')!.textContent = `Spanne je nach Objekt: ${eur(total * 0.9)} – ${eur(total * 1.15)} €`;
+      form!.querySelector('[data-month]')!.textContent = `≈ ${eur(total / cfg.saisonMonate)} €`;
+      form!.querySelector('[data-einsatz]')!.textContent = `ab ${eur(einsatz)} €`;
+
+      last = { area, total, art: art.label, optionen: cfg.optionen.filter((o) => gewaehlt.includes(o.id)).map((o) => o.label) };
+    }
+
+    const syncRange = () => {
+      const pct = ((Number(range.value) - Number(range.min)) / (Number(range.max) - Number(range.min))) * 100;
+      range.style.setProperty('--fill', `${pct}%`);
+    };
+
+    range.addEventListener('input', () => {
+      num.value = range.value;
+      syncRange();
+      calc();
+    });
+    num.addEventListener('input', () => {
+      range.value = String(Math.min(Number(range.max), Math.max(Number(range.min), Number(num.value) || 0)));
+      syncRange();
+      calc();
+    });
+    form.addEventListener('change', (e) => {
+      if ((e.target as HTMLInputElement).name !== 'flaeche') calc();
+    });
+
+    form.querySelector('[data-rechner-cta]')?.addEventListener('click', () => {
+      const optionen = last.optionen.length ? `\nZusatzleistungen: ${last.optionen.join(', ')}` : '';
+      prefillAnfrage({
+        flaeche: last.area,
+        quelle: 'Kostenrechner',
+        nachricht: `Kostenrechner: ca. ${eur(last.area)} m², ${last.art}${optionen}\nRichtpreis Saisonpauschale: ca. ${eur(last.total)} € netto\n\nBitte um ein verbindliches Angebot und eine Objektbegehung.`,
+      });
+    });
+
+    syncRange();
+    calc();
+  }
+</script>

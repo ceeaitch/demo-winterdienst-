@@ -1,0 +1,51 @@
+---
+import Icon from '../components/Icon.astro';
+import Snowfall from '../components/Snowfall.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/site';
+---
+
+<BaseLayout title="Seite nicht gefunden" description="Diese Seite existiert nicht (mehr)." path="/404/">
+  <section class="nf">
+    <Snowfall />
+    <div class="container nf-inner">
+      <p class="eyebrow">Fehler 404</p>
+      <h1>Hier liegt nur Schnee.</h1>
+      <p class="lead">Die gesuchte Seite gibt es nicht – vielleicht wurde sie verschoben. Wir räumen Ihnen den Weg zurück frei.</p>
+      <div class="nf-actions">
+        <a class="btn btn-primary btn-lg" href={withBase('/')}>Zur Startseite <Icon name="arrow-right" size={18} class="arrow" /></a>
+        <a class="btn btn-ghost btn-lg" href={withBase('/einsatzgebiet/')}>Einsatzgebiet</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    position: relative;
+    min-height: 90svh;
+    display: grid;
+    place-items: center;
+    padding: calc(var(--header-h) + 60px) 0 80px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .nf-inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .lead {
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .nf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+</style>

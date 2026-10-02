@@ -1,0 +1,60 @@
+---
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Impressum"
+  description={`Impressum der Demo-Website ${company.name}.`}
+  path="/impressum/"
+  breadcrumbs={[{ name: 'Impressum', path: '/impressum/' }]}
+>
+  <PageHero eyebrow="Rechtliches" title="Impressum" compact />
+  <section class="section legal">
+    <div class="container-narrow">
+      <div class="placeholder">
+        <strong>Demo-Platzhalter:</strong> Diese Website zeigt ein fiktives Unternehmen. Vor dem Livegang müssen hier die
+        vollständigen Pflichtangaben nach § 5 DDG des echten Betreibers stehen.
+      </div>
+      <h2>Angaben zum Anbieter</h2>
+      <p>
+        {company.name} (fiktiv)<br />
+        {company.address.street}<br />
+        {company.address.zip} {company.address.city}
+      </p>
+      <h2>Kontakt</h2>
+      <p>
+        Telefon: {company.phoneDisplay}<br />
+        E-Mail: {company.email}
+      </p>
+      <h2>Noch zu ergänzen</h2>
+      <ul>
+        <li>Rechtsform und vertretungsberechtigte Person(en)</li>
+        <li>Registergericht und Registernummer</li>
+        <li>Umsatzsteuer-Identifikationsnummer</li>
+        <li>Verantwortliche Person für journalistisch-redaktionelle Inhalte (Ratgeber)</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal h2 {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+  }
+
+  .legal p,
+  .legal li {
+    color: var(--text-2);
+  }
+
+  .placeholder {
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius);
+    border: 1px dashed rgb(240 171 252 / 0.5);
+    background: rgb(240 171 252 / 0.06);
+    color: #f5d0fe;
+  }
+</style>

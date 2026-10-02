@@ -1,0 +1,194 @@
+---
+import heroImg from '../../assets/images/strasse-nacht.jpg';
+import AnfrageForm from '../../components/AnfrageForm.astro';
+import EinsatzKarte from '../../components/EinsatzKarte.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import { DEMO_MODE, company } from '../../data/company';
+import { orte, orteMitSeite } from '../../data/orte';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { serviceSchema } from '../../lib/schema';
+import { withBase } from '../../lib/site';
+
+const path = '/einsatzgebiet/';
+const title = 'Einsatzgebiet Winterdienst: Krefeld + 20 km';
+const description =
+  'Winterdienst in allen Krefelder Stadtteilen und bis 20 km um Krefeld: Meerbusch, Willich, Tönisvorst, Kempen, Moers, Neukirchen-Vluyn, Kaarst, Neuss und mehr.';
+const ohneSeite = orte.filter((o) => !o.page);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  breadcrumbs={[{ name: 'Einsatzgebiet', path }]}
+  schema={[serviceSchema({ name: 'Winterdienst in Krefeld und 20 km Umkreis', description, path })]}
+>
+  <PageHero
+    eyebrow="Einsatzgebiet"
+    title={`Winterdienst in Krefeld und ${company.radiusKm} km Umkreis`}
+    lead={`Wir betreuen Unternehmen in allen Krefelder Stadtteilen und in ${orte.filter((o) => o.typ === 'umland').length} Städten und Stadtteilen im Umland – mit festen Touren ab unserem Betriebshof in Krefeld.`}
+    image={heroImg}
+    imageAlt="Verschneite Straße bei Nacht mit Straßenlaternen"
+  >
+    <a class="btn btn-primary btn-lg" href="#karte">Zur Karte <Icon name="arrow-right" size={18} class="arrow" /></a>
+  </PageHero>
+
+  <section class="section" id="karte">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Interaktive Karte</p>
+        <h2>Alle Orte auf einen Blick</h2>
+        <p class="lead">
+          Kurz gesagt: Liegt Ihr Objekt innerhalb von {company.radiusKm} km Luftlinie um Krefeld, sind wir für Sie da. Hell
+          markierte Orte haben eine eigene Seite mit lokalen Details.
+        </p>
+      </header>
+      <div data-reveal><EinsatzKarte /></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="glow-bg" style="--glow-x: 20%; --glow-y: 40%"></div>
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="eyebrow">Lokale Seiten</p>
+        <h2>Winterdienst vor Ort – mit lokalen Details</h2>
+      </header>
+      <div class="grid grid-3" data-reveal-stagger>
+        {
+          orteMitSeite.map((o) => (
+            <a class="card card-hover ort-card" href={withBase(`/einsatzgebiet/${o.slug}/`)}>
+              <p class="ort-meta">
+                <Icon name="map-pin" size={15} /> {o.region} · {o.km.toLocaleString('de-DE')} km
+              </p>
+              <h3>Winterdienst {o.name}</h3>
+              <p class="muted">{o.page.schwerpunkte.map((s) => s.title).join(' · ')}</p>
+              <span class="ort-link">
+                Zur Ortsseite <Icon name="arrow-right" size={16} />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="weitere" data-reveal>
+        <h3>Weitere Orte im Einsatzgebiet</h3>
+        <ul>
+          {ohneSeite.map((o) => <li>{o.name}</li>)}
+        </ul>
+        {
+          DEMO_MODE && (
+            <p class="small muted">
+              Demo-Hinweis: Jeder dieser Orte bekommt im Livebetrieb eine eigene Seite – technisch genügt dafür ein
+              Eintrag in der Datendatei.
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-narrow">
+      <div class="info-box" data-reveal>
+        <span class="icon-badge"><Icon name="scale" size={22} /></span>
+        <div>
+          <h2>Jede Stadt hat ihre eigene Satzung</h2>
+          <p>
+            Räumzeiten, Räumbreiten und erlaubte Streumittel regelt jede Kommune in ihrer Straßenreinigungssatzung selbst.
+            In Krefeld gilt zum Beispiel: werktags 7 bis 20 Uhr, sonn- und feiertags 8 bis 20 Uhr, kein Streusalz auf
+            Gehwegen. In Meerbusch, Willich oder Moers können die Regeln abweichen.
+          </p>
+          <p class="muted">
+            Wir prüfen die Vorgaben für jedes Objekt vor Saisonbeginn – damit Ihr Räumplan zur örtlichen Satzung passt.
+            Mehr dazu im <a href={withBase('/ratgeber/raeumpflicht-krefeld/')}>Ratgeber Räumpflicht Krefeld</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <AnfrageForm />
+</BaseLayout>
+
+<style>
+  .ort-card {
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .ort-card:hover {
+    color: var(--text);
+  }
+
+  .ort-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--ice);
+  }
+
+  .ort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    font-weight: 600;
+    color: var(--ice);
+  }
+
+  .weitere {
+    margin-top: clamp(40px, 5vw, 64px);
+  }
+
+  .weitere h3 {
+    font-size: 1.1rem;
+  }
+
+  .weitere ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .weitere li {
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.9rem;
+    color: var(--text-2);
+  }
+
+  .info-box {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.4rem;
+    padding: clamp(24px, 4vw, 44px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(180deg, rgb(125 211 252 / 0.08), rgb(125 211 252 / 0.02));
+  }
+
+  .info-box h2 {
+    font-size: clamp(1.4rem, 1.2rem + 1vw, 1.9rem);
+  }
+
+  .info-box p:last-child {
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .info-box {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,363 @@
+---
+/**
+ * Live-Frost-Ampel für Krefeld. Datenquelle: Open-Meteo (kostenlos, ohne API-Key).
+ * Logik (vereinfacht, Demo):
+ *   ROT   = Frost/Gefrierpunkt + Niederschlag oder Schneefall → Glättegefahr hoch
+ *   GELB  = Tiefstwert der nächsten 12 h ≤ 3 °C → Reif/Bodenfrost möglich
+ *   GRÜN  = keine Glätte zu erwarten
+ */
+import { company } from '../data/company';
+import Icon from './Icon.astro';
+
+const api = new URL('https://api.open-meteo.com/v1/forecast');
+api.search = new URLSearchParams({
+  latitude: String(company.geo.lat),
+  longitude: String(company.geo.lng),
+  current: 'temperature_2m,precipitation,snowfall,relative_humidity_2m',
+  hourly: 'temperature_2m,precipitation_probability,snowfall',
+  forecast_hours: '12',
+  timezone: 'Europe/Berlin',
+}).toString();
+---
+
+<div class="ampel card" data-ampel data-api={api.href} data-state="loading" aria-live="polite">
+  <div class="ampel-head">
+    <p class="ampel-title"><Icon name="thermometer" size={16} /> Glätte-Ampel Krefeld</p>
+    <span class="ampel-live"><span class="dot"></span> Live</span>
+  </div>
+
+  <div class="ampel-main">
+    <div class="ampel-lights" aria-hidden="true">
+      <span class="light red"></span>
+      <span class="light yellow"></span>
+      <span class="light green"></span>
+    </div>
+    <div class="ampel-status">
+      <p class="ampel-temp"><span data-temp>–</span><small>°C</small></p>
+      <p class="ampel-label" data-label>Wetterdaten werden geladen …</p>
+    </div>
+  </div>
+
+  <dl class="ampel-facts">
+    <div><dt>Tiefstwert 12 h</dt><dd data-min>–</dd></div>
+    <div><dt>Niederschlag</dt><dd data-rain>–</dd></div>
+    <div><dt>Schnee 12 h</dt><dd data-snow>–</dd></div>
+  </dl>
+
+  <p class="ampel-msg" data-msg></p>
+  <p class="ampel-source"><span data-time></span> · Daten: <a href="https://open-meteo.com/" rel="noopener" target="_blank">Open-Meteo</a></p>
+</div>
+
+<style>
+  .ampel {
+    --state: var(--muted);
+    width: 100%;
+    max-width: 400px;
+    padding: 1.4rem;
+    background: rgb(5 10 22 / 0.62);
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+  }
+
+  .ampel[data-state='green'] {
+    --state: var(--ok);
+  }
+
+  .ampel[data-state='yellow'] {
+    --state: var(--warn);
+  }
+
+  .ampel[data-state='red'] {
+    --state: var(--danger);
+    border-color: rgb(251 113 133 / 0.5);
+    box-shadow:
+      var(--shadow),
+      0 0 60px -10px rgb(251 113 133 / 0.45);
+  }
+
+  .ampel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.1rem;
+  }
+
+  .ampel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  .ampel-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--state);
+    box-shadow: 0 0 0 0 var(--state);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    70% {
+      box-shadow: 0 0 0 8px transparent;
+    }
+  }
+
+  .ampel-main {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .ampel-lights {
+    display: grid;
+    gap: 7px;
+    padding: 9px;
+    border-radius: 16px;
+    background: #02060e;
+    border: 1px solid var(--border);
+  }
+
+  .light {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    opacity: 0.16;
+    transition:
+      opacity 0.5s,
+      box-shadow 0.5s;
+  }
+
+  .red {
+    background: var(--danger);
+  }
+
+  .yellow {
+    background: var(--warn);
+  }
+
+  .green {
+    background: var(--ok);
+  }
+
+  [data-state='red'] .red,
+  [data-state='yellow'] .yellow,
+  [data-state='green'] .green {
+    opacity: 1;
+    box-shadow: 0 0 18px 2px currentColor;
+  }
+
+  [data-state='red'] .red {
+    color: var(--danger);
+  }
+
+  [data-state='yellow'] .yellow {
+    color: var(--warn);
+  }
+
+  [data-state='green'] .green {
+    color: var(--ok);
+  }
+
+  .ampel-temp {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 650;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .ampel-temp small {
+    font-size: 1rem;
+    margin-left: 2px;
+    color: var(--text-2);
+  }
+
+  .ampel-label {
+    margin: 0.35rem 0 0;
+    font-weight: 650;
+    color: var(--state);
+  }
+
+  .ampel-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 1.2rem 0 0;
+    padding: 0.8rem 0;
+    border-block: 1px solid var(--border);
+  }
+
+  .ampel-facts dt {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .ampel-facts dd {
+    margin: 0.15rem 0 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ampel-msg {
+    margin: 0.9rem 0 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .ampel-msg:empty {
+    display: none;
+  }
+
+  .ampel-source {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .ampel-source a {
+    color: inherit;
+  }
+</style>
+
+<script>
+  type Weather = {
+    temp: number;
+    min12: number;
+    rainProb: number;
+    snow12: number;
+    precipNow: number;
+    humidity: number;
+    time: string;
+    simulated?: boolean;
+  };
+
+  const CACHE_KEY = 'ww-weather';
+  const CACHE_MS = 10 * 60 * 1000;
+  const SIMULATION: Weather = {
+    temp: -2.4,
+    min12: -4.1,
+    rainProb: 85,
+    snow12: 3.2,
+    precipNow: 0.4,
+    humidity: 94,
+    time: '',
+    simulated: true,
+  };
+
+  const fmt = (n: number, d = 1) => n.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  function level(w: Weather): 'red' | 'yellow' | 'green' {
+    if (w.snow12 > 0 || (w.temp <= 1 && w.precipNow > 0) || (w.min12 <= 0 && w.rainProb >= 50)) return 'red';
+    if (w.min12 <= 3 || (w.temp <= 4 && w.humidity >= 90)) return 'yellow';
+    return 'green';
+  }
+
+  const texts = {
+    red: {
+      label: 'Glättegefahr hoch',
+      msg: 'Unsere Teams sind im Einsatz. Ist Ihr Gehweg bis 7 Uhr frei – und können Sie es beweisen?',
+    },
+    yellow: {
+      label: 'Glätte möglich',
+      msg: 'Reif oder Bodenfrost sind möglich. Unsere Einsatzleitung ist in Bereitschaft.',
+    },
+    green: {
+      label: 'Keine Glätte erwartet',
+      msg: 'Noch ruhig – die beste Zeit, den Winterdienst für die Saison ab 1. November zu sichern.',
+    },
+  };
+
+  function render(el: HTMLElement, w: Weather) {
+    const state = level(w);
+    el.dataset.state = state;
+    const q = (s: string) => el.querySelector<HTMLElement>(s)!;
+    q('[data-temp]').textContent = fmt(w.temp);
+    q('[data-label]').textContent = texts[state].label;
+    q('[data-min]').textContent = `${fmt(w.min12)} °C`;
+    q('[data-rain]').textContent = `${Math.round(w.rainProb)} %`;
+    q('[data-snow]').textContent = `${fmt(w.snow12)} cm`;
+    q('[data-msg]').textContent = texts[state].msg;
+    q('[data-time]').textContent = w.simulated
+      ? 'Simulation einer Frostnacht'
+      : `Stand ${new Date(w.time).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`;
+  }
+
+  function renderError(el: HTMLElement) {
+    el.dataset.state = 'error';
+    el.querySelector('[data-label]')!.textContent = 'Live-Wetter gerade nicht erreichbar';
+    el.querySelector('[data-msg]')!.textContent =
+      'Unsere Einsatzleitung überwacht das Wetter trotzdem rund um die Uhr – auch nachts und am Wochenende.';
+    el.querySelector('[data-time]')!.textContent = 'Keine Live-Daten';
+  }
+
+  async function load(url: string): Promise<Weather> {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) ?? 'null');
+      if (cached && Date.now() - cached.at < CACHE_MS) return cached.data;
+    } catch {
+      /* Speicher nicht verfügbar → einfach neu laden */
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+    const temps: number[] = d.hourly.temperature_2m;
+    const data: Weather = {
+      temp: d.current.temperature_2m,
+      precipNow: d.current.precipitation,
+      humidity: d.current.relative_humidity_2m,
+      min12: Math.min(d.current.temperature_2m, ...temps),
+      rainProb: Math.max(0, ...(d.hourly.precipitation_probability as number[])),
+      snow12: (d.hourly.snowfall as number[]).reduce((a, b) => a + b, 0),
+      time: d.current.time,
+    };
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data }));
+    } catch {
+      /* ignorieren */
+    }
+    return data;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-ampel]').forEach(async (el) => {
+    let live: Weather | null = null;
+    let failed = false;
+    const simulated = () => document.documentElement.dataset.frost === 'on';
+
+    const update = () => {
+      if (simulated()) render(el, SIMULATION);
+      else if (live) render(el, live);
+      else if (failed) renderError(el);
+    };
+
+    window.addEventListener('ww:frost', update);
+    update();
+
+    try {
+      live = await load(el.dataset.api!);
+    } catch {
+      failed = true;
+    }
+    update();
+  });
+</script>

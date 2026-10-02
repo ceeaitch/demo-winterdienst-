@@ -1,0 +1,356 @@
+---
+import { Image } from 'astro:assets';
+import heroImg from '../../assets/images/hero-nacht-schneefall.jpg';
+import { withBase } from '../../lib/site';
+import FrostAmpel from '../FrostAmpel.astro';
+import Icon from '../Icon.astro';
+import Snowfall from '../Snowfall.astro';
+
+const stats = [
+  { value: 20, suffix: ' km', label: 'Einsatzradius rund um Krefeld' },
+  { text: '03:00', suffix: ' Uhr', label: 'Tourstart bei Glättewarnung' },
+  { value: 100, suffix: ' %', label: 'Einsätze digital dokumentiert' },
+  { value: 7, suffix: ' Tage', label: 'Bereitschaft pro Woche' },
+];
+---
+
+<section class="hero" data-parallax-root>
+  <div class="hero-media" data-parallax="0.22">
+    <Image
+      src={heroImg}
+      alt="Verschneite Straße bei Nacht im dichten Schneefall, beleuchtet von Straßenlaternen"
+      widths={[640, 960, 1280, 1920, 2400]}
+      sizes="100vw"
+      loading="eager"
+      fetchpriority="high"
+      quality={72}
+    />
+  </div>
+  <div class="hero-overlay" aria-hidden="true"></div>
+  <Snowfall />
+
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1>
+        <span class="hero-kicker" style="--d: 0.05s">Winterdienst Krefeld für Unternehmen</span>{' '}
+        <span class="hero-line" style="--d: 0.15s">Um 7 Uhr muss Ihr Gehweg frei sein.</span>{' '}
+        <span class="hero-line text-gradient" style="--d: 0.3s">Wir sind ab 3 Uhr im Einsatz.</span>
+      </h1>
+      <p class="lead hero-anim" style="--d: 0.45s">
+        Wir räumen, streuen und <strong>dokumentieren</strong> – nach den Vorgaben der Krefelder Straßenreinigungssatzung.
+        Damit Sie im Haftungsfall einen Nachweis haben, kein Problem.
+      </p>
+      <div class="hero-ctas hero-anim" style="--d: 0.6s">
+        <a class="btn btn-primary btn-lg" href="#pflicht-check">
+          Pflicht-Check starten <span class="small">(60 Sek.)</span>
+          <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+        <a class="btn btn-ghost btn-lg" href="#rechner">Richtpreis berechnen</a>
+      </div>
+      <ul class="hero-chips hero-anim" style="--d: 0.75s">
+        <li class="chip"><Icon name="check" size={15} strokeWidth={2.6} /> Salzfrei auf Gehwegen (§ 6 Satzung)</li>
+        <li class="chip"><Icon name="check" size={15} strokeWidth={2.6} /> Räumprotokoll mit GPS & Foto</li>
+        <li class="chip"><Icon name="check" size={15} strokeWidth={2.6} /> Krefeld + 20 km</li>
+      </ul>
+    </div>
+
+    <div class="hero-side hero-anim" style="--d: 0.5s">
+      <FrostAmpel />
+    </div>
+  </div>
+
+  <a class="scroll-hint" href="#haftung" aria-label="Weiter zur Rechtslage">
+    <span></span>
+  </a>
+</section>
+
+<section class="stats" aria-label="WinterWacht in Zahlen">
+  <div class="container">
+    <dl class="stats-grid" data-reveal-stagger>
+      {
+        stats.map((s) => (
+          <div class="stat">
+            <dt class="sr-only">{s.label}</dt>
+            <dd>
+              <span class="stat-value">
+                {s.text ? s.text : <span data-count-to={s.value}>{s.value}</span>}
+                <span class="stat-suffix">{s.suffix}</span>
+              </span>
+              <span class="stat-label" aria-hidden="true">
+                {s.label}
+              </span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="stats-note">
+      Interessiert an den Details? <a href={withBase('/leistungen/winterdienst-gewerbe/')}>Alle Leistungen ansehen</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: max(100svh, 760px);
+    display: flex;
+    align-items: center;
+    padding: calc(var(--header-h) + 90px) 0 120px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: -8% 0 0;
+    z-index: -2;
+  }
+
+  .hero-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 40%;
+    animation: hero-zoom 2.4s var(--ease-out) both;
+  }
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.12);
+      filter: blur(6px) brightness(0.6);
+    }
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(5 10 22 / 0.92) 0%, rgb(5 10 22 / 0.72) 45%, rgb(5 10 22 / 0.25) 100%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 35%);
+  }
+
+  :global([data-frost='on']) .hero-overlay {
+    background:
+      linear-gradient(90deg, rgb(10 6 24 / 0.92) 0%, rgb(20 8 30 / 0.7) 45%, rgb(60 10 30 / 0.25) 100%),
+      linear-gradient(0deg, var(--bg) 0%, transparent 35%);
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+  }
+
+  h1 {
+    margin-bottom: 1.4rem;
+  }
+
+  .hero-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin-bottom: 1.3rem;
+  }
+
+  .hero-kicker::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .hero-line {
+    display: block;
+  }
+
+  .hero-kicker,
+  .hero-line,
+  .hero-anim {
+    animation: rise 1.2s var(--ease-out) both;
+    animation-delay: calc(var(--d, 0s) + 0.2s);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(8px);
+    }
+  }
+
+  .lead {
+    max-width: 600px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin: 2rem 0 1.6rem;
+  }
+
+  .hero-ctas .small {
+    opacity: 0.7;
+    font-weight: 500;
+  }
+
+  .hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hero-side {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 34px;
+    z-index: 2;
+    width: 26px;
+    height: 42px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 999px;
+    transform: translateX(-50%);
+  }
+
+  .scroll-hint span {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    width: 3px;
+    height: 8px;
+    margin-left: -1.5px;
+    border-radius: 3px;
+    background: var(--ice);
+    animation: wheel 1.8s infinite;
+  }
+
+  @keyframes wheel {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+  }
+
+  /* --- Zahlenleiste --- */
+  .stats {
+    position: relative;
+    z-index: 3;
+    margin-top: -64px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: rgb(8 17 31 / 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    overflow: hidden;
+  }
+
+  .stat {
+    padding: clamp(20px, 2.6vw, 34px);
+    border-right: 1px solid var(--border);
+  }
+
+  .stat:last-child {
+    border-right: 0;
+  }
+
+  .stat dd {
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 1.3rem + 1.6vw, 2.7rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: var(--grad-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .stat-suffix {
+    font-size: 0.55em;
+    letter-spacing: 0;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-2);
+  }
+
+  .stats-note {
+    text-align: center;
+    margin: 1.4rem 0 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 960px) {
+    .hero {
+      padding-top: calc(var(--header-h) + 70px);
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-side {
+      justify-content: flex-start;
+    }
+
+    .scroll-hint {
+      display: none;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat:nth-child(2) {
+      border-right: 0;
+    }
+
+    .stat:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .hero-ctas .btn {
+      width: 100%;
+    }
+  }
+</style>

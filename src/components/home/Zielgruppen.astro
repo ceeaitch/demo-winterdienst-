@@ -1,0 +1,166 @@
+---
+import { Image } from 'astro:assets';
+import imgHandarbeit from '../../assets/images/handraeumung-zugang.jpg';
+import imgParkplatz from '../../assets/images/parkplatz-schnee.jpg';
+import imgFahrzeug from '../../assets/images/raeumfahrzeug-einsatz.jpg';
+import imgWohnanlage from '../../assets/images/wohnanlage-nacht.jpg';
+import Icon from '../Icon.astro';
+
+const gruppen = [
+  {
+    img: imgFahrzeug,
+    alt: 'Orangefarbenes Räumfahrzeug mit Schneeschild auf verschneiter Straße',
+    icon: 'building',
+    title: 'Gewerbe, Industrie & Logistik',
+    text: 'Zufahrten, Rampen, Ladezonen und Mitarbeiterparkplätze – frei vor Schichtbeginn, auch um 6 Uhr.',
+    tag: 'Europark Fichtenhain · Rheinhafen · Münchheide',
+  },
+  {
+    img: imgParkplatz,
+    alt: 'Verschneiter Parkplatz mit Autos aus der Vogelperspektive',
+    icon: 'store',
+    title: 'Handel & Gastronomie',
+    text: 'Kundenparkplatz und Eingang sicher zur Öffnung. Fahrgassen und Wege räumen wir maschinell, Eingänge per Hand.',
+    tag: 'BGH VI ZR 184/18: Fahr- & Gehwege sichern',
+  },
+  {
+    img: imgWohnanlage,
+    alt: 'Verschneite Wohnanlage mit Parkplatz bei Nacht',
+    icon: 'home',
+    title: 'Hausverwaltungen & WEG',
+    text: 'Gehwege, Hauszugänge und Mülltonnenwege für ganze Portfolios – mit Protokollen, die Sie Eigentümern vorlegen.',
+    tag: 'BGH VIII ZR 250/23: Haftung für Dienstleister',
+  },
+  {
+    img: imgHandarbeit,
+    alt: 'Mitarbeiter in Warnkleidung räumt Schnee an einem Eingang',
+    icon: 'health',
+    title: 'Praxen, Pflege & Kitas',
+    text: 'Barrierefreie Zugänge, Rampen und Treppen für Menschen, die besonders sturzgefährdet sind – sorgfältig per Hand.',
+    tag: 'Erhöhte Sorgfalt bei sensiblen Besuchern',
+  },
+] as const;
+---
+
+<section class="section" id="zielgruppen">
+  <div class="container">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">Für wen wir räumen</p>
+      <h2>Winterdienst, der zu Ihrem Betrieb passt.</h2>
+      <p class="lead">
+        Jede Branche hat andere Spitzenzeiten und andere Haftungsrisiken. Wir planen Ihre Tour nach Ihrem Betrieb – nicht
+        nach unserem Fuhrpark.
+      </p>
+    </header>
+
+    <div class="zg-grid" data-reveal-stagger>
+      {
+        gruppen.map((g) => (
+          <article class="zg-card">
+            <div class="zg-media">
+              <Image src={g.img} alt={g.alt} width={960} widths={[480, 720, 960]} sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 300px" quality={70} />
+            </div>
+            <div class="zg-body">
+              <span class="zg-icon">
+                <Icon name={g.icon} size={20} />
+              </span>
+              <h3>{g.title}</h3>
+              <p>{g.text}</p>
+              <p class="zg-tag">{g.tag}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .zg-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(16px, 2vw, 24px);
+  }
+
+  .zg-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    isolation: isolate;
+  }
+
+  .zg-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .zg-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .zg-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(5 10 22 / 0.1) 0%, rgb(5 10 22 / 0.65) 45%, rgb(5 10 22 / 0.96) 100%);
+  }
+
+  .zg-card:hover .zg-media :global(img) {
+    transform: scale(1.07);
+  }
+
+  .zg-body {
+    margin-top: auto;
+    padding: clamp(20px, 2.4vw, 28px);
+  }
+
+  .zg-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgb(125 211 252 / 0.18);
+    border: 1px solid rgb(125 211 252 / 0.35);
+    color: var(--ice);
+    margin-bottom: 1rem;
+    backdrop-filter: blur(6px);
+  }
+
+  .zg-body p {
+    color: var(--text-2);
+    font-size: 0.95rem;
+  }
+
+  .zg-tag {
+    margin: 0;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem !important;
+    color: var(--ice) !important;
+  }
+
+  @media (max-width: 1100px) {
+    .zg-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .zg-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .zg-card {
+      min-height: 400px;
+    }
+  }
+</style>

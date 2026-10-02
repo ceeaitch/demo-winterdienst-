@@ -1,0 +1,374 @@
+---
+import Icon from '../Icon.astro';
+
+const schritte = [
+  {
+    time: '02:30',
+    icon: 'cloud-snow',
+    title: 'Wetterdaten melden Glättegefahr',
+    text: 'Unsere Einsatzleitung überwacht Temperatur, Niederschlag und Straßenzustand rund um die Uhr. Bei Frost und Niederschlag wird die Tour ausgelöst – automatisch, auch am Wochenende.',
+  },
+  {
+    time: '03:15',
+    icon: 'truck',
+    title: 'Teams & Fahrzeuge rücken aus',
+    text: 'Feste Touren, optimierte Reihenfolge: Objekte mit frühem Schichtbeginn kommen zuerst. Die Fahrzeuge sind mit satzungskonformem, salzfreiem Streugut für Gehwege beladen.',
+  },
+  {
+    time: '05:30',
+    icon: 'snowflake',
+    title: 'Ihr Objekt ist geräumt & gestreut',
+    text: 'Gehweg, Zugänge, Treppen, Zufahrt und Parkplatz-Fahrgassen – maschinell, wo es geht, und per Hand, wo es nötig ist.',
+  },
+  {
+    time: '06:00',
+    icon: 'file-check',
+    title: 'Protokoll in Ihrem Postfach',
+    text: 'Zeitstempel, GPS-Position, Fotos und Temperatur – Ihr Nachweis, dass die Verkehrssicherungspflicht erfüllt wurde. Abrufbar für die ganze Saison.',
+  },
+  {
+    time: '07:00',
+    icon: 'shield',
+    title: 'Ihre Leute kommen sicher an',
+    text: 'Die Krefelder Räumfrist ist eingehalten. Bei anhaltendem Schneefall fahren wir Kontrollgänge – bei Bedarf mehrmals täglich bis 20 Uhr.',
+  },
+] as const;
+
+const minutes = schritte.map((s) => {
+  const [h, m] = s.time.split(':').map(Number);
+  return h * 60 + m;
+});
+---
+
+<section class="night" id="ablauf" data-night data-minutes={JSON.stringify(minutes)}>
+  <div class="night-sky" aria-hidden="true">
+    <div class="sky-dawn"></div>
+    <div class="sky-stars"></div>
+  </div>
+
+  <div class="night-pin">
+    <div class="container night-head">
+      <div>
+        <p class="eyebrow">So läuft eine Frostnacht mit uns</p>
+        <h2>Während Sie schlafen, erfüllen wir Ihre Pflichten.</h2>
+      </div>
+      <p class="night-clock" aria-hidden="true">
+        <Icon name="clock" size={22} />
+        <span data-clock>02:30</span>
+      </p>
+    </div>
+
+    <div class="night-viewport">
+      <ol class="night-track" data-night-track>
+        {
+          schritte.map((s, i) => (
+            <li class="night-step" data-step={i}>
+              <p class="night-time">
+                <time>{s.time}</time> Uhr
+              </p>
+              <span class="night-icon">
+                <Icon name={s.icon} size={24} />
+              </span>
+              <h3>{s.title}</h3>
+              <p class="muted">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    <div class="container">
+      <div class="night-progress" aria-hidden="true"><span data-night-progress></span></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .night {
+    --p: 0;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(180deg, var(--bg) 0%, #070f22 20%, #070f22 80%, var(--bg) 100%);
+  }
+
+  .night-sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  /* Morgendämmerung blendet mit Scroll-Fortschritt ein */
+  .sky-dawn {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 70% at 50% 120%, rgb(251 146 60 / 0.35), transparent 60%),
+      radial-gradient(80% 50% at 50% 110%, rgb(244 114 182 / 0.22), transparent 70%);
+    opacity: var(--p);
+  }
+
+  .sky-stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #fff, transparent),
+      radial-gradient(1px 1px at 28% 42%, #dbeafe, transparent),
+      radial-gradient(1.5px 1.5px at 44% 12%, #fff, transparent),
+      radial-gradient(1px 1px at 63% 30%, #e0f2fe, transparent),
+      radial-gradient(1.5px 1.5px at 78% 15%, #fff, transparent),
+      radial-gradient(1px 1px at 88% 48%, #dbeafe, transparent),
+      radial-gradient(1px 1px at 6% 62%, #fff, transparent),
+      radial-gradient(1px 1px at 52% 58%, #e0f2fe, transparent);
+    opacity: calc(0.8 - var(--p) * 0.7);
+  }
+
+  .night-pin {
+    padding-block: var(--section-y);
+  }
+
+  .night-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 2rem;
+    margin-bottom: clamp(32px, 5vw, 64px);
+  }
+
+  .night-head h2 {
+    max-width: 720px;
+    margin: 0;
+  }
+
+  .night-clock {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: rgb(5 10 22 / 0.6);
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--frost);
+    flex: none;
+  }
+
+  .night-clock :global(svg) {
+    color: var(--ice);
+  }
+
+  .night-track {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .night-step {
+    position: relative;
+    padding: clamp(24px, 3vw, 36px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgb(148 197 255 / 0.07), rgb(148 197 255 / 0.02));
+    transition:
+      border-color 0.5s,
+      background 0.5s,
+      opacity 0.5s,
+      transform 0.6s var(--ease-out);
+  }
+
+  .night-time {
+    margin: 0 0 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ice);
+  }
+
+  .night-time time {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-right: 0.2rem;
+  }
+
+  .night-icon {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    margin-bottom: 1.2rem;
+    background: linear-gradient(140deg, rgb(125 211 252 / 0.22), rgb(96 165 250 / 0.06));
+    border: 1px solid rgb(125 211 252 / 0.3);
+    color: var(--ice);
+  }
+
+  .night-step p:last-child {
+    margin: 0;
+  }
+
+  .night-progress {
+    height: 2px;
+    margin-top: clamp(28px, 4vw, 48px);
+    background: var(--surface-2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .night-progress span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--grad-ice);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+  }
+
+  /* --- Desktop: horizontal, gepinnt (wird per JS aktiviert) --- */
+  :global(.night-horizontal) .night-viewport {
+    overflow: visible;
+  }
+
+  :global(.night-horizontal) .night-track {
+    display: flex;
+    gap: 28px;
+    width: max-content;
+    padding-inline: max(var(--gutter), calc((100vw - var(--container)) / 2));
+  }
+
+  :global(.night-horizontal) .night-step {
+    width: min(420px, 34vw);
+    flex: none;
+    opacity: 0.45;
+  }
+
+  :global(.night-horizontal) .night-step.is-active {
+    opacity: 1;
+    border-color: rgb(125 211 252 / 0.45);
+    background: linear-gradient(180deg, rgb(125 211 252 / 0.14), rgb(125 211 252 / 0.03));
+    transform: translateY(-6px);
+  }
+
+  /* --- Mobil / ohne Animation: vertikale Zeitleiste --- */
+  :global(html:not(.night-horizontal)) .night-track {
+    display: grid;
+    gap: 1rem;
+    width: min(100% - 2 * var(--gutter), 860px);
+    margin-inline: auto;
+    padding-left: 22px;
+    border-left: 2px solid var(--border-strong);
+  }
+
+  :global(html:not(.night-horizontal)) .night-step::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 34px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ice);
+    box-shadow: 0 0 0 5px rgb(125 211 252 / 0.2);
+  }
+
+  :global(html:not(.night-horizontal)) .night-progress {
+    display: none;
+  }
+
+  @media (max-width: 700px) {
+    .night-head {
+      flex-direction: column;
+      align-items: start;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>('[data-night]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (section && !reduceMotion) {
+    const track = section.querySelector<HTMLElement>('[data-night-track]')!;
+    const steps = [...track.querySelectorAll<HTMLElement>('.night-step')];
+    const clock = section.querySelector<HTMLElement>('[data-clock]')!;
+    const bar = section.querySelector<HTMLElement>('[data-night-progress]')!;
+    const minutes: number[] = JSON.parse(section.dataset.minutes ?? '[]');
+    const pin = section.querySelector<HTMLElement>('.night-pin')!;
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    function update(p: number) {
+      section!.style.setProperty('--p', p.toFixed(3));
+      bar.style.transform = `scaleX(${p})`;
+      // Uhrzeit zwischen den Schritten interpolieren (auf 5 Minuten gerundet)
+      const pos = p * (minutes.length - 1);
+      const i = Math.min(minutes.length - 2, Math.floor(pos));
+      const m = minutes[i] + (minutes[i + 1] - minutes[i]) * (pos - i);
+      const rounded = Math.round(m / 5) * 5;
+      clock.textContent = `${pad(Math.floor(rounded / 60))}:${pad(rounded % 60)}`;
+      const active = Math.round(pos);
+      steps.forEach((s, idx) => s.classList.toggle('is-active', idx === active));
+    }
+
+    const mm = gsap.matchMedia();
+
+    // Desktop: Sektion fixieren, Karten horizontal durchscrollen
+    mm.add('(min-width: 960px)', () => {
+      document.documentElement.classList.add('night-horizontal');
+      const distance = () => track.scrollWidth - window.innerWidth;
+
+      const tween = gsap.to(track, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: pin,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 0.8,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => update(self.progress),
+        },
+      });
+      update(0);
+
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+        gsap.set(track, { clearProps: 'transform' });
+        document.documentElement.classList.remove('night-horizontal');
+      };
+    });
+
+    // Mobil: vertikale Liste, Uhr & Himmel folgen dem Scrollen durch die Sektion
+    mm.add('(max-width: 959px)', () => {
+      const st = ScrollTrigger.create({
+        trigger: track,
+        start: 'top 70%',
+        end: 'bottom 60%',
+        onUpdate: (self) => update(self.progress),
+      });
+      gsap.from(steps, {
+        opacity: 0,
+        x: 30,
+        duration: 0.9,
+        ease: 'expo.out',
+        stagger: 0.1,
+        scrollTrigger: { trigger: track, start: 'top 80%', once: true },
+      });
+      return () => st.kill();
+    });
+  }
+</script>

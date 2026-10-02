@@ -1,0 +1,223 @@
+---
+import { company } from '../../data/company';
+import { withBase } from '../../lib/site';
+import Icon from '../Icon.astro';
+
+const fakten = [
+  {
+    big: '07:00',
+    unit: 'Uhr',
+    title: 'Räumfrist an Werktagen',
+    text: 'In Krefeld müssen Gehwege werktags von 7 bis 20 Uhr geräumt und gestreut sein – sonn- und feiertags ab 8 Uhr. Schnee, der nachts fällt, muss bis dahin weg sein.',
+    source: 'Straßenreinigungssatzung Krefeld',
+  },
+  {
+    big: '§ 823',
+    unit: 'BGB',
+    title: 'Sie haften bei Glätteunfällen',
+    text: 'Stürzt jemand auf Ihrem ungeräumten Gehweg, haften Sie für Behandlungskosten, Verdienstausfall und Schmerzensgeld – auch gegenüber Mitarbeitenden von Lieferanten und Kunden.',
+    source: 'Bürgerliches Gesetzbuch',
+  },
+  {
+    big: '0 g',
+    unit: 'Salz',
+    title: 'Streusalz ist auf Gehwegen tabu',
+    text: 'Auf Geh- und Radwegen sind in Krefeld nur abstumpfende Mittel wie Sand, Splitt oder Granulat erlaubt. Wer „schnell mal Salz streut“, verstößt gegen die Satzung.',
+    source: '§ 6 Abs. 2 Straßenreinigungssatzung Krefeld',
+  },
+];
+
+const urteile = [
+  {
+    date: '01.07.2025',
+    az: 'BGH VI ZR 357/24',
+    text: 'Die Anforderungen an den Nachweis „allgemeiner Glätte“ dürfen nicht überspannt werden. Gestürzte setzen Ansprüche dadurch leichter durch.',
+  },
+  {
+    date: '06.08.2025',
+    az: 'BGH VIII ZR 250/23',
+    text: 'Vermieter haften gegenüber Mietern für Fehler des beauftragten Winterdienstes wie für eigenes Verschulden (§ 278 BGB).',
+  },
+];
+---
+
+<section class="section haftung" id="haftung">
+  <div class="glow-bg" style="--glow-x: 15%; --glow-y: 20%"></div>
+  <div class="container">
+    <header class="section-head" data-reveal>
+      <p class="eyebrow">Die Rechtslage in Krefeld</p>
+      <h2>Sie haften – auch wenn Sie um 6 Uhr noch schlafen.</h2>
+      <p class="lead">
+        Als Eigentümer, Vermieter oder Gewerbetreibender tragen Sie die Verkehrssicherungspflicht für den Gehweg vor
+        Ihrem Grundstück und für Ihre Zugänge. Seit 2025 ist das Risiko spürbar gestiegen.
+      </p>
+    </header>
+
+    <div class="grid grid-3" data-reveal-stagger>
+      {
+        fakten.map((f) => (
+          <article class="card card-hover fakt">
+            <p class="fakt-big">
+              <span>{f.big}</span>
+              <small>{f.unit}</small>
+            </p>
+            <h3>{f.title}</h3>
+            <p class="muted">{f.text}</p>
+            <p class="fakt-source">
+              <Icon name="scale" size={14} /> {f.source}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="urteile" data-reveal>
+      <div class="urteile-intro">
+        <span class="badge-new">Neu seit 2025</span>
+        <h3>Zwei BGH-Urteile, die Eigentümer kennen sollten</h3>
+        <p class="muted">
+          Delegieren bleibt erlaubt – aber nur ein Dienstleister, der nachweisbar arbeitet, schützt Sie wirklich.
+        </p>
+        <a class="btn btn-primary" href="#pflicht-check">
+          Mein Risiko prüfen <Icon name="arrow-right" size={18} class="arrow" />
+        </a>
+      </div>
+      <ol class="urteile-list">
+        {
+          urteile.map((u) => (
+            <li>
+              <p class="urteil-meta">
+                <time>{u.date}</time> · <strong>{u.az}</strong>
+              </p>
+              <p>{u.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    <p class="legal-note">
+      Allgemeine Information, keine Rechtsberatung. Stand: {company.legalAsOf}. Ausführlich mit Quellen im
+      <a href={withBase('/ratgeber/raeumpflicht-krefeld/')}>Ratgeber Räumpflicht Krefeld</a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .fakt-big {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0 0 1.2rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .fakt-big span {
+    font-size: clamp(2.8rem, 2rem + 2.4vw, 4rem);
+    background: var(--grad-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .fakt-big small {
+    font-size: 1rem;
+    letter-spacing: 0;
+    color: var(--ice);
+    font-weight: 600;
+  }
+
+  .fakt-source {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1.2rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .urteile {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(24px, 4vw, 64px);
+    margin-top: clamp(40px, 6vw, 72px);
+    padding: clamp(24px, 4vw, 48px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(251 191 36 / 0.25);
+    background:
+      radial-gradient(120% 140% at 0% 0%, rgb(251 191 36 / 0.1), transparent 55%),
+      linear-gradient(180deg, rgb(148 197 255 / 0.05), rgb(148 197 255 / 0.02));
+  }
+
+  .badge-new {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgb(251 191 36 / 0.15);
+    color: var(--warn);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .urteile-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+    counter-reset: u;
+  }
+
+  .urteile-list li {
+    position: relative;
+    padding: 1.2rem 1.2rem 1.2rem 3.4rem;
+    border-radius: var(--radius);
+    background: rgb(5 10 22 / 0.5);
+    border: 1px solid var(--border);
+    counter-increment: u;
+  }
+
+  .urteile-list li::before {
+    content: counter(u);
+    position: absolute;
+    left: 1.1rem;
+    top: 1.15rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgb(251 191 36 / 0.18);
+    color: var(--warn);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .urteile-list p {
+    margin: 0;
+  }
+
+  .urteil-meta {
+    font-size: 0.85rem;
+    color: var(--warn);
+    margin-bottom: 0.35rem !important;
+  }
+
+  .urteil-meta strong {
+    color: var(--warn);
+  }
+
+  @media (max-width: 860px) {
+    .urteile {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

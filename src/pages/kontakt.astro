@@ -1,0 +1,84 @@
+---
+import AnfrageForm from '../components/AnfrageForm.astro';
+import Icon from '../components/Icon.astro';
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { absoluteUrl } from '../lib/site';
+import { ids } from '../lib/schema';
+
+const path = '/kontakt/';
+const title = 'Kontakt & Angebot – Winterdienst Krefeld';
+const description = `Winterdienst-Angebot für Krefeld und Umgebung anfordern: Telefon ${company.phoneDisplay}, E-Mail oder Formular. Kostenlose Objektbegehung, Antwort in 24 Stunden.`;
+
+const kontakte = [
+  { icon: 'phone', label: 'Telefon', value: company.phoneDisplay, href: `tel:${company.phone}` },
+  { icon: 'mail', label: 'E-Mail', value: company.email, href: `mailto:${company.email}` },
+  { icon: 'map-pin', label: 'Betriebshof', value: `${company.address.street}, ${company.address.zip} ${company.address.city}` },
+  { icon: 'clock', label: 'Erreichbarkeit', value: 'Büro Mo–Fr 8–17 Uhr · Einsatzleitung in der Saison rund um die Uhr' },
+] as const;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  breadcrumbs={[{ name: 'Kontakt', path }]}
+  schema={[{ '@type': 'ContactPage', '@id': absoluteUrl(`${path}#contact`), url: absoluteUrl(path), about: { '@id': ids.org } }]}
+>
+  <PageHero
+    eyebrow="Kontakt"
+    title="Sprechen wir über Ihren Winterdienst"
+    lead="Rufen Sie an, schreiben Sie uns oder nutzen Sie das Formular. Wir melden uns innerhalb von 24 Stunden an Werktagen."
+    compact
+  />
+
+  <section class="kontakt-cards">
+    <div class="container">
+      <ul class="grid grid-4" data-reveal-stagger>
+        {
+          kontakte.map((k) => (
+            <li class="card">
+              <span class="icon-badge">
+                <Icon name={k.icon} size={22} />
+              </span>
+              <p class="k-label">{k.label}</p>
+              {'href' in k ? (
+                <a class="k-value" href={k.href}>
+                  {k.value}
+                </a>
+              ) : (
+                <p class="k-value">{k.value}</p>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <AnfrageForm title="Ihre Anfrage" />
+</BaseLayout>
+
+<style>
+  .kontakt-cards ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .k-label {
+    margin: 0 0 0.3rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .k-value {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-word;
+  }
+</style>

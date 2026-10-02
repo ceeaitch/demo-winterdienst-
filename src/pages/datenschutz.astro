@@ -1,0 +1,70 @@
+---
+import PageHero from '../components/PageHero.astro';
+import { company } from '../data/company';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Datenschutz"
+  description={`Datenschutzhinweise der Demo-Website ${company.name}.`}
+  path="/datenschutz/"
+  breadcrumbs={[{ name: 'Datenschutz', path: '/datenschutz/' }]}
+>
+  <PageHero eyebrow="Rechtliches" title="Datenschutz" compact />
+  <section class="section legal">
+    <div class="container-narrow">
+      <div class="placeholder">
+        <strong>Demo-Platzhalter:</strong> Vor dem Livegang muss hier eine vollständige Datenschutzerklärung des echten
+        Betreibers stehen. Die folgenden Punkte zeigen, welche Dienste diese Website technisch nutzt.
+      </div>
+
+      <h2>Was diese Website technisch nutzt</h2>
+      <ul>
+        <li>
+          <strong>Hosting:</strong> GitHub Pages (GitHub Inc.). Beim Aufruf werden technisch notwendige Daten wie die
+          IP-Adresse verarbeitet.
+        </li>
+        <li>
+          <strong>Schriften:</strong> werden lokal von diesem Server geladen – keine Verbindung zu Google Fonts.
+        </li>
+        <li>
+          <strong>Karte:</strong> Kartenkacheln von OpenStreetMap (tile.openstreetmap.org). Beim Laden der Karte wird die
+          IP-Adresse an die OpenStreetMap Foundation übertragen. Für den Livebetrieb: Zwei-Klick-Lösung oder selbst
+          gehostete Kacheln prüfen.
+        </li>
+        <li>
+          <strong>Wetterdaten:</strong> Die Glätte-Ampel ruft Daten von Open-Meteo (api.open-meteo.com) ab. Dabei wird die
+          IP-Adresse an den Anbieter übertragen.
+        </li>
+        <li>
+          <strong>Kontaktformular:</strong> In der Demo werden keine Daten versendet oder gespeichert.
+        </li>
+        <li>
+          <strong>Browser-Speicher:</strong> Die Demo merkt sich im Sitzungsspeicher (sessionStorage) nur den Zustand der
+          Präsentations-Werkzeuge und Wetterdaten für 10 Minuten. Keine Cookies, kein Tracking.
+        </li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal h2 {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+  }
+
+  .legal p,
+  .legal li {
+    color: var(--text-2);
+    margin-bottom: 0.6rem;
+  }
+
+  .placeholder {
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius);
+    border: 1px dashed rgb(240 171 252 / 0.5);
+    background: rgb(240 171 252 / 0.06);
+    color: #f5d0fe;
+  }
+</style>

@@ -1,0 +1,387 @@
+---
+/**
+ * Interaktive Einsatzgebiet-Karte (Leaflet + OpenStreetMap, ohne API-Key).
+ * Leaflet wird erst geladen, wenn die Karte in Sichtweite kommt (Performance).
+ * Die Ortsliste daneben ist normales HTML → für Google lesbar und barrierefrei.
+ */
+import 'leaflet/dist/leaflet.css';
+import { company } from '../data/company';
+import { orte } from '../data/orte';
+import { withBase } from '../lib/site';
+
+interface Props {
+  /** Ort hervorheben (Ortsseiten) */
+  focus?: string;
+  showList?: boolean;
+  height?: string;
+}
+
+const { focus, showList = true, height = '560px' } = Astro.props;
+
+const punkte = orte.map((o) => ({
+  name: o.name,
+  lat: o.lat,
+  lng: o.lng,
+  km: o.km,
+  url: o.page ? withBase(`/einsatzgebiet/${o.slug}/`) : null,
+  focus: o.slug === focus,
+}));
+const stadtteile = orte.filter((o) => o.typ === 'stadtteil');
+const umland = orte.filter((o) => o.typ === 'umland');
+---
+
+<div class:list={['karte-wrap', { 'with-list': showList }]}>
+  <div
+    class="karte"
+    style={`--map-h: ${height}`}
+    data-karte
+    data-punkte={JSON.stringify(punkte)}
+    data-center={JSON.stringify(company.geo)}
+    data-radius={company.radiusKm * 1000}
+    data-focus={focus ?? ''}
+    role="region"
+    aria-label={`Karte des Einsatzgebiets: ${company.radiusKm} km rund um Krefeld`}
+  >
+    <div class="karte-placeholder">
+      <span class="pulse-ring"></span>
+      <p>Karte wird geladen …</p>
+    </div>
+  </div>
+
+  {
+    showList && (
+      <div class="ort-liste">
+        <h3>Krefeld</h3>
+        <ul>
+          {stadtteile.map((o) => (
+            <li data-ort={o.name}>
+              {o.page ? <a href={withBase(`/einsatzgebiet/${o.slug}/`)}>{o.name}</a> : <span>{o.name}</span>}
+              <span class="km">{o.km.toLocaleString('de-DE')} km</span>
+            </li>
+          ))}
+        </ul>
+        <h3>Umland bis {company.radiusKm} km</h3>
+        <ul>
+          {umland.map((o) => (
+            <li data-ort={o.name}>
+              {o.page ? <a href={withBase(`/einsatzgebiet/${o.slug}/`)}>{o.name}</a> : <span>{o.name}</span>}
+              <span class="km">{o.km.toLocaleString('de-DE')} km</span>
+            </li>
+          ))}
+        </ul>
+        <p class="small muted">Entfernung = Luftlinie ab Betriebshof Krefeld. Verlinkte Orte haben eine eigene Seite.</p>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .karte-wrap {
+    display: grid;
+    gap: clamp(20px, 3vw, 32px);
+  }
+
+  .karte-wrap.with-list {
+    grid-template-columns: 1.6fr 0.9fr;
+    align-items: start;
+  }
+
+  .karte {
+    position: relative;
+    height: var(--map-h);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    background: #0a1426;
+    isolation: isolate;
+  }
+
+  .karte-placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .pulse-ring {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ice);
+    box-shadow: 0 0 0 0 rgb(125 211 252 / 0.6);
+    animation: ring 1.6s infinite;
+  }
+
+  @keyframes ring {
+    to {
+      box-shadow: 0 0 0 28px transparent;
+    }
+  }
+
+  /* Dunkle Karte per CSS-Filter auf den OSM-Kacheln */
+  .karte :global(.leaflet-tile-pane) {
+    filter: invert(1) hue-rotate(195deg) brightness(0.85) contrast(0.92) saturate(0.45);
+  }
+
+  .karte :global(.leaflet-container) {
+    background: #0a1426;
+    font-family: var(--font-sans);
+  }
+
+  .karte :global(.leaflet-control-attribution) {
+    background: rgb(5 10 22 / 0.75);
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .karte :global(.leaflet-control-attribution a) {
+    color: var(--text-2);
+  }
+
+  .karte :global(.leaflet-bar a) {
+    background: rgb(8 17 31 / 0.9);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .karte :global(.ww-marker) {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ice);
+    border: 2px solid #031021;
+    box-shadow: 0 0 0 4px rgb(125 211 252 / 0.25);
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  .karte :global(.ww-marker.has-page) {
+    background: #fff;
+    box-shadow:
+      0 0 0 4px rgb(125 211 252 / 0.45),
+      0 0 18px 4px rgb(125 211 252 / 0.6);
+  }
+
+  .karte :global(.ww-marker.is-focus) {
+    transform: scale(1.5);
+  }
+
+  .karte :global(.ww-hq) {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--grad-ice);
+    color: #031021;
+    font-weight: 800;
+    font-size: 12px;
+    box-shadow: 0 0 0 8px rgb(125 211 252 / 0.2);
+  }
+
+  .karte :global(.leaflet-popup-content-wrapper),
+  .karte :global(.leaflet-popup-tip) {
+    background: #0d1a30;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+
+  .karte :global(.leaflet-popup-content) {
+    margin: 12px 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .karte :global(.leaflet-popup-content a) {
+    color: var(--ice);
+    font-weight: 600;
+  }
+
+  .karte :global(.leaflet-tooltip) {
+    background: rgb(5 10 22 / 0.9);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .karte :global(.leaflet-tooltip-top::before) {
+    border-top-color: rgb(5 10 22 / 0.9);
+  }
+
+  .ort-liste {
+    padding: clamp(20px, 2.5vw, 28px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    max-height: var(--list-h, 560px);
+    overflow: auto;
+  }
+
+  .ort-liste h3 {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin: 0 0 0.6rem;
+  }
+
+  .ort-liste ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.4rem;
+  }
+
+  .ort-liste li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.4rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.93rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+
+  .ort-liste li.is-hover {
+    background: var(--surface-2);
+  }
+
+  .ort-liste a {
+    font-weight: 600;
+  }
+
+  .km {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 960px) {
+    .karte-wrap.with-list {
+      grid-template-columns: 1fr;
+    }
+
+    .karte {
+      height: min(var(--map-h), 70vh);
+    }
+
+    .ort-liste {
+      max-height: none;
+    }
+  }
+</style>
+
+<script>
+  type Punkt = { name: string; lat: number; lng: number; km: number; url: string | null; focus: boolean };
+
+  async function initKarte(el: HTMLElement) {
+    // Leaflet ist ein CommonJS-Paket → je nach Bundler liegt es unter .default
+    const mod = await import('leaflet');
+    const L = ((mod as unknown as { default?: typeof mod }).default ?? mod) as typeof mod;
+    const punkte: Punkt[] = JSON.parse(el.dataset.punkte!);
+    const center: { lat: number; lng: number } = JSON.parse(el.dataset.center!);
+    const radius = Number(el.dataset.radius);
+    const focusPoint = punkte.find((p) => p.focus);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    el.querySelector('.karte-placeholder')?.remove();
+
+    const map = L.map(el, {
+      center: focusPoint ? [focusPoint.lat, focusPoint.lng] : [center.lat, center.lng],
+      zoom: focusPoint ? 11 : 9,
+      scrollWheelZoom: false, // Seite scrollt weiter, statt die Karte zu zoomen
+      dragging: !L.Browser.mobile,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende',
+    }).addTo(map);
+
+    // 20-km-Kreis „wächst“ beim Erscheinen auf
+    const circle = L.circle([center.lat, center.lng], {
+      radius: reduceMotion ? radius : 1,
+      color: '#7dd3fc',
+      weight: 1.5,
+      dashArray: '6 6',
+      fillColor: '#38bdf8',
+      fillOpacity: 0.07,
+    }).addTo(map);
+
+    if (!reduceMotion) {
+      const t0 = performance.now();
+      const grow = (t: number) => {
+        const p = Math.min(1, (t - t0) / 1400);
+        circle.setRadius(radius * (1 - (1 - p) ** 3));
+        if (p < 1) requestAnimationFrame(grow);
+      };
+      requestAnimationFrame(grow);
+    }
+
+    L.marker([center.lat, center.lng], {
+      icon: L.divIcon({ className: '', html: '<div class="ww-hq">WW</div>', iconSize: [34, 34], iconAnchor: [17, 17] }),
+      title: 'Betriebshof Krefeld',
+      zIndexOffset: 1000,
+    })
+      .addTo(map)
+      .bindPopup('<strong>Betriebshof Krefeld</strong><br>Start aller Touren');
+
+    const listItems = new Map<string, HTMLElement>();
+    el.closest('.karte-wrap')
+      ?.querySelectorAll<HTMLElement>('[data-ort]')
+      .forEach((li) => listItems.set(li.dataset.ort!, li));
+
+    punkte.forEach((p, i) => {
+      const cls = ['ww-marker', p.url ? 'has-page' : '', p.focus ? 'is-focus' : ''].join(' ');
+      const marker = L.marker([p.lat, p.lng], {
+        icon: L.divIcon({ className: '', html: `<div class="${cls}"></div>`, iconSize: [14, 14], iconAnchor: [7, 7] }),
+        title: p.name,
+        opacity: reduceMotion ? 1 : 0,
+      }).addTo(map);
+
+      const link = p.url ? `<br><a href="${p.url}">Winterdienst ${p.name} →</a>` : '<br><small>Im Einsatzgebiet</small>';
+      marker.bindPopup(`<strong>${p.name}</strong><br>${p.km.toLocaleString('de-DE')} km vom Betriebshof${link}`);
+      marker.bindTooltip(p.name, { direction: 'top', offset: [0, -8], permanent: Boolean(p.url) || p.focus });
+
+      // Marker nacheinander einblenden
+      if (!reduceMotion) window.setTimeout(() => marker.setOpacity(1), 500 + i * 45);
+
+      const li = listItems.get(p.name);
+      if (li) {
+        li.addEventListener('mouseenter', () => {
+          li.classList.add('is-hover');
+          marker.openPopup();
+        });
+        li.addEventListener('mouseleave', () => li.classList.remove('is-hover'));
+      }
+    });
+
+    if (focusPoint) {
+      map.setView([focusPoint.lat, focusPoint.lng], 11);
+    } else {
+      map.fitBounds(circle.getLatLng().toBounds(radius * 2), { padding: [10, 10] });
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-karte]').forEach((el) => {
+    new IntersectionObserver(
+      ([entry], obs) => {
+        if (entry.isIntersecting) {
+          obs.disconnect();
+          initKarte(el).catch(() => {
+            el.innerHTML = '<p style="padding:2rem;color:var(--muted)">Karte konnte nicht geladen werden.</p>';
+          });
+        }
+      },
+      { rootMargin: '300px' },
+    ).observe(el);
+  });
+</script>
